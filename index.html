@@ -8,6 +8,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
+    <!-- Navbar -->
     <nav class="bg-slate-800 p-4 border-b border-slate-700 shadow-lg">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-wider text-amber-400">🏆 SWEEPSTAKE LIVE</h1>
@@ -15,8 +16,10 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="max-w-6xl mx-auto p-6 space-y-6">
         
+        <!-- Prize Rules Dashboard Header -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm bg-slate-800/50 border border-slate-700/60 rounded-xl p-4">
             <div><p class="text-slate-400">🥇 Winner</p><p class="text-lg font-bold text-amber-400">£35</p></div>
             <div><p class="text-slate-400">🥈 Runner Up</p><p class="text-lg font-bold text-slate-300">£10</p></div>
@@ -24,11 +27,22 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+        <!-- 🎛️ Interactive Navigation Toggle Tabs -->
+        <div class="flex border-b border-slate-700">
+            <button id="tab-fixtures" onclick="switchTab('fixtures')" class="px-6 py-2 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors">
+                ⚽ Live & Upcoming Fixtures
+            </button>
+            <button id="tab-groups" onclick="switchTab('groups')" class="px-6 py-2 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
+                📊 Tournament Groups
+            </button>
+        </div>
+
+        <!-- 💥 VIEW 1: Live Matches Block Container -->
+        <div id="view-fixtures" class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 
-                    Active Live Fixtures
+                    Active 48-Hour Live Slate
                 </h3>
             </div>
             <div id="fixtures-container" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -36,6 +50,12 @@
             </div>
         </div>
 
+        <!-- 💥 VIEW 2: Group Tables Matrix (Hidden by default) -->
+        <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Group tables insert dynamically here -->
+        </div>
+
+        <!-- Leaderboard Stats Dashboard -->
         <h3 class="font-bold text-lg text-slate-300 pt-4">Standings Dashboard</h3>
         <div id="matrix-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <p class="text-slate-400 animate-pulse col-span-3 text-center py-12">Loading matrix logs...</p>
@@ -61,11 +81,12 @@
           { player: "Ryan", teams: ["Turkey", "Bosnia & Herzegovina", "Uzbekistan", "Ghana", "Cape Verde", "USA", "Germany", "Netherlands"] }
         ];
 
-        const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?output=csv";
+        // URLs linking directly to your separate Published CSV tabs from your Sheet doc
+        const MATCHES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=0&output=csv";
+        const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=2040608035&output=csv";
 
-        // 🧠 BULLETPROOF LOOKUP METHOD: Strips spaces, symbols, and casing to ensure an absolute match
         function cleanString(str) {
-            return str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+            return str ? str.toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
         }
 
         function getOwner(teamName) {
@@ -78,10 +99,8 @@
 
         function getFlagImg(teamName) {
             const cleanTarget = cleanString(teamName);
-            // Search the flag database keys using the same bulletproof strategy
             const key = Object.keys(countryCodes).find(k => cleanString(k) === cleanTarget);
             const code = key ? countryCodes[key] : null;
-            
             if (!code) return `<span class="mr-2">🏳️</span>`;
             return `<img src="https://flagcdn.com/16x12/${code}.png" class="inline mr-2 shadow-sm rounded-xs border border-slate-700" alt="" style="vertical-align: middle; display: inline-block;" />`;
         }
@@ -93,11 +112,31 @@
             });
         });
 
-        async function loadSheetData() {
+        // 🎛️ Navigation Tab Control Function
+        function switchTab(view) {
+            const fixtView = document.getElementById('view-fixtures');
+            const groupView = document.getElementById('view-groups');
+            const btnFixt = document.getElementById('tab-fixtures');
+            const btnGroup = document.getElementById('tab-groups');
+
+            if (view === 'fixtures') {
+                fixtView.classList.remove('hidden');
+                groupView.classList.add('hidden');
+                btnFixt.className = "px-6 py-2 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
+                btnGroup.className = "px-6 py-2 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
+            } else {
+                fixtView.classList.add('hidden');
+                groupView.classList.remove('hidden');
+                btnFixt.className = "px-6 py-2 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
+                btnGroup.className = "px-6 py-2 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
+            }
+        }
+
+        // Process active fixtures tab
+        async function loadMatchesData() {
             try {
-                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                const response = await fetch(MATCHES_CSV_URL);
                 const text = await response.text();
-                
                 const rows = text.split('\n').slice(1); 
                 let fixturesHTML = '';
 
@@ -111,7 +150,6 @@
                         const status = cols[4] ? cols[4].trim() : 'UPCOMING';
                         const kickoff = cols[5] ? cols[5].trim() : '--:--';
 
-                        // Dynamic stats matching using normalized name tags
                         const homeKey = Object.keys(teamStats).find(k => cleanString(k) === cleanString(home));
                         const awayKey = Object.keys(teamStats).find(k => cleanString(k) === cleanString(away));
 
@@ -155,12 +193,78 @@
                     }
                 });
 
-                document.getElementById('fixtures-container').innerHTML = fixturesHTML || `<p class="text-slate-500 text-xs italic py-2">No data active.</p>`;
+                document.getElementById('fixtures-container').innerHTML = fixturesHTML || `<p class="text-slate-500 text-xs italic py-2 col-span-2 text-center">No matches inside layout window.</p>`;
                 renderDashboard();
-
             } catch (error) {
-                document.getElementById('matrix-grid').innerHTML = `<p class="text-red-400 col-span-3 text-center">Google Sheet sync connection error.</p>`;
                 console.error(error);
+            }
+        }
+
+        // Process Groups Data Tab
+        async function loadGroupsData() {
+            try {
+                const response = await fetch(GROUPS_CSV_URL);
+                const text = await response.text();
+                const rows = text.split('\n');
+                
+                let container = document.getElementById('view-groups');
+                container.innerHTML = '';
+                
+                let currentGroupCard = '';
+                let inTable = false;
+
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    if (cols.length === 0 || cols[0].trim() === '') {
+                        if (inTable) {
+                            currentGroupCard += `</tbody></table></div>`;
+                            container.innerHTML += currentGroupCard;
+                            currentGroupCard = '';
+                            inTable = false;
+                        }
+                        return;
+                    }
+
+                    const cell0 = cols[0].trim();
+                    if (cell0.startsWith("Group")) {
+                        inTable = true;
+                        currentGroupCard = `
+                            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+                                <h4 class="text-amber-400 font-bold mb-2 tracking-wide border-b border-slate-700 pb-1">${cell0}</h4>
+                                <table class="w-full text-xs text-left text-slate-300">
+                                    <thead>
+                                        <tr class="text-slate-500 font-mono">
+                                            <th class="py-1">Team</th>
+                                            <th class="py-1 text-center">P</th>
+                                            <th class="py-1 text-center">GD</th>
+                                            <th class="py-1 text-center font-bold text-slate-400">PTS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-700/40">
+                        `;
+                    } else if (inTable && cell0 !== "Home Team" && cell0 !== "Team") {
+                        const name = cell0;
+                        const p = cols[1]?.trim() || '0';
+                        const gd = cols[5]?.trim() || '0';
+                        const pts = cols[6]?.trim() || '0';
+
+                        currentGroupCard += `
+                            <tr>
+                                <td class="py-2 font-medium flex items-center truncate max-w-[130px]">${getFlagImg(name)} ${name}</td>
+                                <td class="py-2 text-center font-mono">${p}</td>
+                                <td class="py-2 text-center font-mono text-slate-400">${gd}</td>
+                                <td class="py-2 text-center font-mono font-bold text-emerald-400">${pts}</td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                if (inTable) {
+                    currentGroupCard += `</tbody></table></div>`;
+                    container.innerHTML += currentGroupCard;
+                }
+            } catch (error) {
+                console.error("Groups render failure: ", error);
             }
         }
 
@@ -193,7 +297,13 @@
             });
         }
 
-        loadSheetData();
+        // Initialize dashboard routines
+        async function init() {
+            await loadMatchesData();
+            await loadGroupsData();
+        }
+
+        init();
     </script>
 </body>
 </html>
