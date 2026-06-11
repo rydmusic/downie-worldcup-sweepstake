@@ -24,13 +24,27 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+            <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 
+                    Today's Fixtures & Sweeps
+                </h3>
+                <span id="matchday-date" class="text-xs text-slate-400 font-mono"></span>
+            </div>
+            <div id="fixtures-container" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p class="text-slate-400 text-sm italic col-span-2 text-center py-4">Checking today's schedule...</p>
+            </div>
+        </div>
+
+        <h3 class="font-bold text-lg text-slate-300 pt-4">Standings Dashboard</h3>
         <div id="matrix-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <p class="text-slate-400 animate-pulse col-span-3 text-center py-12">Connecting to live sports database...</p>
         </div>
     </main>
 
     <script>
-        // 1. Data corrected to match official FIFA API naming conventions
+        // Data compiled from your photo
         const sweepstakeData = [
           { player: "Archie", teams: ["Algeria", "Canada", "Egypt", "Australia", "Congo DR", "Iraq", "Portugal", "Croatia"] },
           { player: "Bea", teams: ["Qatar", "Sweden", "Ivory Coast", "Ecuador", "Korea Republic", "Haiti", "England", "Spain"] },
@@ -40,10 +54,16 @@
           { player: "Ryan", teams: ["Turkey", "Bosnia & Herzegovina", "Uzbekistan", "Ghana", "Cape Verde", "USA", "Germany", "Netherlands"] }
         ];
 
-        // 2. Your Authenticated Live Token and League Details
+        // API Setup
         const API_KEY = "64728c7362msh877fb4fa9f8687dp1e1476jsncf45c0b51895"; 
         const WORLD_CUP_ID = 4; 
         const TOURNAMENT_SEASON = "2026";
+
+        // Helper function to map a team name back to its sweepstake owner
+        function getOwner(teamName) {
+            const found = sweepstakeData.find(p => p.teams.includes(teamName));
+            return found ? found.player : "No Owner";
+        }
 
         let teamStats = {};
         sweepstakeData.forEach(player => {
@@ -67,14 +87,20 @@
                 const result = await response.json();
                 const matches = result.response || [];
 
+                // Format today's date to match the API signature (YYYY-MM-DD)
+                const todayStr = new Date().toISOString().split('T')[0];
+                document.getElementById('matchday-date').innerText = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+
+                let todayMatchesHTML = '';
+
                 matches.forEach(match => {
-                    // Check if match has goals data available
                     if (match.goals && match.teams) {
                         const homeTeam = match.teams.home.name;
                         const awayTeam = match.teams.away.name;
                         const homeGoals = match.goals.home ?? 0;
                         const awayGoals = match.goals.away ?? 0;
 
+                        // Process running tournament statistics
                         if (teamStats[homeTeam]) {
                             teamStats[homeTeam].scored += homeGoals;
                             teamStats[homeTeam].conceded += awayGoals;
@@ -83,8 +109,49 @@
                             teamStats[awayTeam].scored += awayGoals;
                             teamStats[awayTeam].conceded += homeGoals;
                         }
+
+                        // Filter out if match belongs to today's date string
+                        const matchDateStr = match.fixture.date.split('T')[0];
+                        if (matchDateStr === todayStr) {
+                            const homeOwner = getOwner(homeTeam);
+                            const awayOwner = getOwner(awayTeam);
+                            const status = match.fixture.status.short;
+                            let liveStatusBadge = `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono">${match.fixture.status.short}</span>`;
+                            
+                            if (['1H','2H','HT'].includes(status)) {
+                                liveStatusBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-xs font-mono font-bold animate-pulse">LIVE</span>`;
+                            } else if (status === 'FT') {
+                                liveStatusBadge = `<span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-xs font-mono">FT</span>`;
+                            }
+
+                            todayMatchesHTML += `
+                                <div class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3">
+                                    <div class="flex items-center justify-between w-full text-xs text-slate-400">
+                                        <span>Kickoff: ${new Date(match.fixture.date).toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}</span>
+                                        ${liveStatusBadge}
+                                    </div>
+                                    <div class="flex justify-between items-center w-full px-2">
+                                        <div class="text-center w-5/12">
+                                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${homeTeam}</p>
+                                            <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${homeOwner}</p>
+                                        </div>
+                                        <div class="w-2/12 text-center font-mono font-black text-lg text-emerald-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700/40">
+                                            ${homeGoals}-${awayGoals}
+                                        </div>
+                                        <div class="text-center w-5/12">
+                                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${awayTeam}</p>
+                                            <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${awayOwner}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
                     }
                 });
+
+                // Render out matches dashboard panel or empty state
+                const fixturesContainer = document.getElementById('fixtures-container');
+                fixturesContainer.innerHTML = todayMatchesHTML || `<p class="text-slate-400 text-sm italic col-span-2 text-center py-4">No World Cup games scheduled for today!</p>`;
 
                 renderDashboard();
             } catch (error) {
