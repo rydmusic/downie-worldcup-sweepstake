@@ -28,22 +28,22 @@
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 
-                    Upcoming Fixtures & Sweeps (Today & Tomorrow)
+                    Upcoming Fixtures & Sweeps (Next 48 Hours)
                 </h3>
             </div>
             
             <div class="p-4 space-y-6">
                 <div>
-                    <h4 id="today-heading" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Today</h4>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Playing Today / Next 24h</h4>
                     <div id="today-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <p class="text-slate-500 text-xs italic py-2">Loading today's matches...</p>
+                        <p class="text-slate-500 text-xs italic py-2">No matches scheduled within the next 24 hours.</p>
                     </div>
                 </div>
 
                 <div>
-                    <h4 id="tomorrow-heading" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Tomorrow</h4>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Playing Tomorrow / Next 48h</h4>
                     <div id="tomorrow-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <p class="text-slate-500 text-xs italic py-2">Loading tomorrow's matches...</p>
+                        <p class="text-slate-500 text-xs italic py-2">No matches scheduled inside this window.</p>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
     </main>
 
     <script>
-        // Mapping team names to standard 2-letter ISO codes for beautiful web graphics
+        // Mapping team names to standard 2-letter ISO codes for graphics
         const countryCodes = {
             "Algeria": "dz", "Canada": "ca", "Egypt": "eg", "Australia": "au", "Congo DR": "cd", "Iraq": "iq", "Portugal": "pt", "Croatia": "hr",
             "Qatar": "qa", "Sweden": "se", "Ivory Coast": "ci", "Ecuador": "ec", "Korea Republic": "kr", "Haiti": "ht", "England": "gb-eng", "Spain": "es",
@@ -84,7 +84,6 @@
             return found ? found.player : "No Owner";
         }
 
-        // Generate flag graphic elements safely
         function getFlagImg(teamName) {
             const code = countryCodes[teamName];
             if (!code) return `<span class="mr-2">🏳️</span>`;
@@ -112,7 +111,7 @@
             return `
                 <div class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3">
                     <div class="flex items-center justify-between w-full text-xs text-slate-400">
-                        <span>Kickoff: ${matchDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}</span>
+                        <span>Kickoff: ${matchDate.toLocaleDateString('en-GB', {day:'numeric', month:'short'})} ${matchDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}</span>
                         ${liveStatusBadge}
                     </div>
                     <div class="flex justify-between items-center w-full px-2">
@@ -147,12 +146,8 @@
                 const result = await response.json();
                 const matches = result.response || [];
 
-                const today = new Date();
-                const tomorrow = new Date();
-                tomorrow.setDate(today.getDate() + 1);
-
-                document.getElementById('today-heading').innerText = `Today (${today.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'})})`;
-                document.getElementById('tomorrow-heading').innerText = `Tomorrow (${tomorrow.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'})})`;
+                const nowMs = Date.now();
+                const oneDayMs = 24 * 60 * 60 * 1000;
 
                 let todayHTML = '';
                 let tomorrowHTML = '';
@@ -174,6 +169,12 @@
                         }
 
                         const matchDate = new Date(match.fixture.date);
+                        const diffMs = matchDate.getTime() - nowMs;
+
+                        // Rolling timeframe checks
+                        const isNext24h = diffMs >= -3 * 60 * 60 * 1000 && diffMs <= oneDayMs; 
+                        const isNext48h = diffMs > oneDayMs && diffMs <= (oneDayMs * 2);
+
                         const matchObj = {
                             home: homeTeam,
                             away: awayTeam,
@@ -182,16 +183,16 @@
                             status: match.fixture.status.short
                         };
 
-                        if (matchDate.toDateString() === today.toDateString()) {
+                        if (isNext24h) {
                             todayHTML += buildFixtureHTML(matchObj, matchDate);
-                        } else if (matchDate.toDateString() === tomorrow.toDateString()) {
+                        } else if (isNext48h) {
                             tomorrowHTML += buildFixtureHTML(matchObj, matchDate);
                         }
                     }
                 });
 
-                document.getElementById('today-fixtures').innerHTML = todayHTML || `<p class="text-slate-500 text-xs italic py-2">No matches scheduled for today.</p>`;
-                document.getElementById('tomorrow-fixtures').innerHTML = tomorrowHTML || `<p class="text-slate-500 text-xs italic py-2">No matches scheduled for tomorrow.</p>`;
+                if (todayHTML) document.getElementById('today-fixtures').innerHTML = todayHTML;
+                if (tomorrowHTML) document.getElementById('tomorrow-fixtures').innerHTML = tomorrowHTML;
 
                 renderDashboard();
             } catch (error) {
