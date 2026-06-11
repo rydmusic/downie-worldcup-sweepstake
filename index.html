@@ -61,7 +61,6 @@
           { player: "Ryan", teams: ["Turkey", "Bosnia & Herzegovina", "Uzbekistan", "Ghana", "Cape Verde", "USA", "Germany", "Netherlands"] }
         ];
 
-        // Connected straight to your live Google CSV link
         const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?output=csv";
 
         function getOwner(teamName) {
@@ -106,7 +105,7 @@
                         }
                         if (teamStats[away]) {
                             teamStats[away].scored += awayScore;
-                            teamStats[awayTeam] ? teamStats[away].conceded += homeScore : teamStats[away].conceded += homeScore;
+                            teamStats[away].conceded += homeScore;
                         }
 
                         let statusBadge = `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono font-bold">${status}</span>`;
