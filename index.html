@@ -8,7 +8,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
-    <!-- Navbar -->
     <nav class="bg-slate-800 p-4 border-b border-slate-700 shadow-lg">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-wider text-amber-400">🏆 SWEEPSTAKE LIVE</h1>
@@ -16,10 +15,8 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-6xl mx-auto p-6 space-y-6">
         
-        <!-- Prize Rules Dashboard Header -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm bg-slate-800/50 border border-slate-700/60 rounded-xl p-4">
             <div><p class="text-slate-400">🥇 Winner</p><p class="text-lg font-bold text-amber-400">£35</p></div>
             <div><p class="text-slate-400">🥈 Runner Up</p><p class="text-lg font-bold text-slate-300">£10</p></div>
@@ -27,17 +24,18 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
-        <!-- Interactive Navigation Toggle Tabs -->
-        <div class="flex border-b border-slate-700">
-            <button id="tab-fixtures" onclick="switchTab('fixtures')" class="px-6 py-2 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors">
-                ⚽ Live & Upcoming Fixtures
+        <div class="flex flex-wrap border-b border-slate-700 gap-1">
+            <button id="tab-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors">
+                ⚽ Live Fixtures
             </button>
-            <button id="tab-groups" onclick="switchTab('groups')" class="px-6 py-2 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
+            <button id="tab-groups" onclick="switchTab('groups')" class="px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
                 📊 Tournament Groups
+            </button>
+            <button id="tab-splits" onclick="switchTab('splits')" class="px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors">
+                📋 Sweepstake Splits
             </button>
         </div>
 
-        <!-- VIEW 1: Live Matches Block Container -->
         <div id="view-fixtures" class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
@@ -50,32 +48,34 @@
             </div>
         </div>
 
-        <!-- VIEW 2: Group Tables Matrix (Hidden by default) -->
         <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Group tables insert dynamically here -->
-        </div>
+            </div>
 
-        <!-- 🏆 NEW: Sweepstake Custom Leaderboard Tracker -->
-        <h3 class="font-bold text-lg text-slate-300 pt-4">Sweepstake Leaderboard</h3>
-        <p class="text-xs text-slate-400 -mt-4">Displays each player's highest-scoring team and highest-conceding team (alphabetical tiebreaker applied).</p>
-        
-        <div class="overflow-x-auto bg-slate-800 rounded-xl border border-slate-700 shadow-md">
-            <table class="w-full text-sm text-left text-slate-200">
-                <thead class="text-xs uppercase bg-slate-700/40 text-slate-400 font-mono">
-                    <tr>
-                        <th class="px-6 py-3">Player</th>
-                        <th class="px-6 py-3 text-emerald-400">🔥 Max Attacking Team</th>
-                        <th class="px-6 py-3 text-center text-emerald-400">Goals</th>
-                        <th class="px-6 py-3 text-red-400">🛡️ Max Defending Team</th>
-                        <th class="px-6 py-3 text-center text-red-400">Conceded</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body" class="divide-y divide-slate-700/60">
-                    <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-slate-400 animate-pulse">Calculating team statistics...</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div id="view-splits" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+        <div id="leaderboard-section" class="space-y-4">
+            <h3 class="font-bold text-lg text-slate-300 pt-4">Sweepstake Leaderboard</h3>
+            <p class="text-xs text-slate-400 -mt-4">Displays each player's highest-scoring team and highest-conceding team (alphabetical tiebreaker applied).</p>
+            
+            <div class="overflow-x-auto bg-slate-800 rounded-xl border border-slate-700 shadow-md">
+                <table class="w-full text-sm text-left text-slate-200">
+                    <thead class="text-xs uppercase bg-slate-700/40 text-slate-400 font-mono">
+                        <tr>
+                            <th class="px-6 py-3">Player</th>
+                            <th class="px-6 py-3 text-emerald-400">🔥 Max Attacking Team</th>
+                            <th class="px-6 py-3 text-center text-emerald-400">Goals</th>
+                            <th class="px-6 py-3 text-red-400">🛡️ Max Defending Team</th>
+                            <th class="px-6 py-3 text-center text-red-400">Conceded</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="divide-y divide-slate-700/60">
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-slate-400 animate-pulse">Calculating team statistics...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
@@ -128,22 +128,36 @@
             });
         });
 
+        // 🎛️ Multi-Tab Control Script Engine
         function switchTab(view) {
             const fixtView = document.getElementById('view-fixtures');
             const groupView = document.getElementById('view-groups');
+            const splitsView = document.getElementById('view-splits');
+            const leadSection = document.getElementById('leaderboard-section');
+
             const btnFixt = document.getElementById('tab-fixtures');
             const btnGroup = document.getElementById('tab-groups');
+            const btnSplits = document.getElementById('tab-splits');
+
+            // Hide all by default
+            fixtView.classList.add('hidden');
+            groupView.classList.add('hidden');
+            splitsView.classList.add('hidden');
+            leadSection.classList.add('hidden');
+
+            btnFixt.className = btnGroup.className = btnSplits.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
 
             if (view === 'fixtures') {
                 fixtView.classList.remove('hidden');
-                groupView.classList.add('hidden');
-                btnFixt.className = "px-6 py-2 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
-                btnGroup.className = "px-6 py-2 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
-            } else {
-                fixtView.classList.add('hidden');
+                leadSection.classList.remove('hidden');
+                btnFixt.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
+            } else if (view === 'groups') {
                 groupView.classList.remove('hidden');
-                btnFixt.className = "px-6 py-2 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
-                btnGroup.className = "px-6 py-2 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
+                leadSection.classList.remove('hidden');
+                btnGroup.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
+            } else if (view === 'splits') {
+                splitsView.classList.remove('hidden');
+                btnSplits.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             }
         }
 
@@ -209,6 +223,7 @@
 
                 document.getElementById('fixtures-container').innerHTML = fixturesHTML || `<p class="text-slate-500 text-xs italic py-2 col-span-2 text-center">No matches inside layout window.</p>`;
                 renderLeaderboard();
+                renderSplitsView();
             } catch (error) {
                 console.error(error);
             }
@@ -281,7 +296,6 @@
             }
         }
 
-        // 🧠 NEW REFACTORED LEADERBOARD CALCULATION
         function renderLeaderboard() {
             const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = '';
@@ -289,46 +303,11 @@
             sweepstakeData.forEach(playerData => {
                 let bestAttackingTeam = "";
                 let maxGoals = -1;
-
                 let worstDefendingTeam = "";
                 let maxConceded = -1;
 
-                // Sort teams alphabetically beforehand to handle tiebreaks natively
                 const sortedTeams = [...playerData.teams].sort();
 
                 sortedTeams.forEach(team => {
                     const stats = teamStats[team] || { scored: 0, conceded: 0 };
-
-                    // If goals scored is higher, update. Strict '>' preserves first alphabetical choice.
                     if (stats.scored > maxGoals) {
-                        maxGoals = stats.scored;
-                        bestAttackingTeam = team;
-                    }
-                    // If goals conceded is higher, update. Strict '>' preserves first alphabetical choice.
-                    if (stats.conceded > maxConceded) {
-                        maxConceded = stats.conceded;
-                        worstDefendingTeam = team;
-                    }
-                });
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-700/20 transition-colors">
-                        <td class="px-6 py-3.5 font-bold text-amber-400">${playerData.player}</td>
-                        <td class="px-6 py-3.5 font-medium">${getFlagImg(bestAttackingTeam)} ${bestAttackingTeam}</td>
-                        <td class="px-6 py-3.5 text-center font-mono font-bold text-emerald-400">${maxGoals}</td>
-                        <td class="px-6 py-3.5 font-medium">${getFlagImg(worstDefendingTeam)} ${worstDefendingTeam}</td>
-                        <td class="px-6 py-3.5 text-center font-mono font-bold text-red-400">${maxConceded}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        async function init() {
-            await loadMatchesData();
-            await loadGroupsData();
-        }
-
-        init();
-    </script>
-</body>
-</html>
