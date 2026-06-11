@@ -119,13 +119,13 @@
             "Turkey": "tr", "Bosnia & Herzegovina": "ba", "Uzbekistan": "uz", "Ghana": "gh", "Cape Verde": "cv", "USA": "us", "Germany": "de", "Netherlands": "nl"
         };
 
-        // 🖼️ Managed Player Asset Table (Ryan's Live production link integrated)
+        // 🖼️ Fully Populated Player Avatar Production Links
         const playerAvatars = {
-            "Archie": "PASTE_ARCHIE_IMAGE_ID_HERE",
-            "Bea":     "PASTE_BEA_IMAGE_ID_HERE",
-            "Craig":   "PASTE_CRAIG_IMAGE_ID_HERE",
-            "Emily":   "PASTE_EMILY_IMAGE_ID_HERE",
-            "Laura":   "PASTE_LAURA_IMAGE_ID_HERE",
+            "Archie": "1ZksBwr9aL3rC6teVBao4lmSl2LH10-Ch",
+            "Bea":     "1IzacfbMyEUzLQImHQvzS2Ah_MXgRG5mV",
+            "Craig":   "1xTlpGghzh-KjB5BDK_4O4WxEGnlwcFT3",
+            "Emily":   "At1bdaF-gdjxmJ7O5VjxZKE78ZBsYktS",
+            "Laura":   "1u1SKOWJwscbAO1y-xWwSlgOKGg0DokUE",
             "Ryan":    "1xuQEf6L0V0Juj_9VA3ySfa_gmFqXPYrT"
         };
 
@@ -157,7 +157,7 @@
             if (playerName === "No Owner") return `<span class="text-slate-500 text-[10px] font-bold">🏳️ NO OWNER</span>`;
             const id = playerAvatars[playerName];
             
-            if (id && !id.startsWith("PASTE_")) {
+            if (id) {
                 return `
                     <span class="inline-flex items-center gap-1.5 bg-slate-900/80 px-2 py-0.5 rounded-full border border-slate-700">
                         <img src="https://lh3.googleusercontent.com/d/${id}" class="w-4 h-4 rounded-full object-cover border border-slate-600 shadow-xs" alt="" />
@@ -397,7 +397,7 @@
                 let playerCard = `
                     <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
                         <div class="flex items-center gap-3 border-b border-slate-700 pb-2 mb-3">
-                            <h2 class="text-xl font-bold text-amber-400">${playerData.player}</h2>
+                            <div class="mb-1">${getOwnerBadge(playerData.player)}</div>
                         </div>
                         <ul class="space-y-2">
                 `;
