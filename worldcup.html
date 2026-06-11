@@ -1,0 +1,30 @@
+<div id="matrix-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+
+<script>
+  const grid = document.getElementById('matrix-grid');
+  
+  sweepstakeData.forEach(playerData => {
+    // Generate the HTML card for each player
+    let playerCard = `
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
+        <h2 class="text-xl font-bold text-amber-400 border-b border-slate-700 pb-2 mb-3">${playerData.player}</h2>
+        <ul class="space-y-2">
+    `;
+    
+    playerData.teams.forEach(team => {
+      // Highlights the top seeded teams you marked with a green asterisk (*)
+      const starBadge = team.star ? '⭐' : '';
+      const textStyle = team.star ? 'text-emerald-400 font-semibold' : 'text-slate-300';
+      
+      playerCard += `
+        <li class="flex justify-between items-center text-sm p-1.5 bg-slate-900/40 rounded">
+          <span class="${textStyle}">${team.name} ${starBadge}</span>
+          <span class="text-xs text-slate-500 font-mono">Seed: ${team.seed}</span>
+        </li>
+      `;
+    });
+    
+    playerCard += `</ul></div>`;
+    grid.innerHTML += playerCard;
+  });
+</script>
