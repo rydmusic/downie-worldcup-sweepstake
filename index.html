@@ -27,7 +27,7 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
-        <!-- 🎛️ Interactive Navigation Toggle Tabs -->
+        <!-- Interactive Navigation Toggle Tabs -->
         <div class="flex border-b border-slate-700">
             <button id="tab-fixtures" onclick="switchTab('fixtures')" class="px-6 py-2 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors">
                 ⚽ Live & Upcoming Fixtures
@@ -37,7 +37,7 @@
             </button>
         </div>
 
-        <!-- 💥 VIEW 1: Live Matches Block Container -->
+        <!-- VIEW 1: Live Matches Block Container -->
         <div id="view-fixtures" class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        <!-- 💥 VIEW 2: Group Tables Matrix (Hidden by default) -->
+        <!-- VIEW 2: Group Tables Matrix (Hidden by default) -->
         <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Group tables insert dynamically here -->
         </div>
@@ -81,9 +81,9 @@
           { player: "Ryan", teams: ["Turkey", "Bosnia & Herzegovina", "Uzbekistan", "Ghana", "Cape Verde", "USA", "Germany", "Netherlands"] }
         ];
 
-        // URLs linking directly to your separate Published CSV tabs from your Sheet doc
+        // 🔗 Corrected spreadsheet tab endpoints using your precise tab ID property
         const MATCHES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=0&output=csv";
-        const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=2040608035&output=csv";
+        const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=1430000650&output=csv";
 
         function cleanString(str) {
             return str ? str.toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
@@ -112,7 +112,6 @@
             });
         });
 
-        // 🎛️ Navigation Tab Control Function
         function switchTab(view) {
             const fixtView = document.getElementById('view-fixtures');
             const groupView = document.getElementById('view-groups');
@@ -132,7 +131,6 @@
             }
         }
 
-        // Process active fixtures tab
         async function loadMatchesData() {
             try {
                 const response = await fetch(MATCHES_CSV_URL);
@@ -200,7 +198,6 @@
             }
         }
 
-        // Process Groups Data Tab
         async function loadGroupsData() {
             try {
                 const response = await fetch(GROUPS_CSV_URL);
@@ -297,7 +294,6 @@
             });
         }
 
-        // Initialize dashboard routines
         async function init() {
             await loadMatchesData();
             await loadGroupsData();
