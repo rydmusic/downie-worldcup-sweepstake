@@ -28,22 +28,15 @@
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 
-                    Upcoming Fixtures & Sweeps (Next 48 Hours)
+                    Sofascore Active Team Schedules
                 </h3>
             </div>
             
             <div class="p-4 space-y-6">
                 <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Playing Today / Next 24h</h4>
-                    <div id="today-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <p class="text-slate-500 text-xs italic py-2">Syncing live games with Sofascore...</p>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Playing Tomorrow / Next 48h</h4>
-                    <div id="tomorrow-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <p class="text-slate-500 text-xs italic py-2">Syncing upcoming schedule with Sofascore...</p>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Live & Next Matches (Today / Tomorrow)</h4>
+                    <div id="sweepstake-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p class="text-slate-500 text-xs italic py-2">Querying sweepstake team roster metrics...</p>
                     </div>
                 </div>
             </div>
@@ -56,7 +49,6 @@
     </main>
 
     <script>
-        // Mapping team names to standard 2-letter ISO codes for crisp graphics
         const countryCodes = {
             "Algeria": "dz", "Canada": "ca", "Egypt": "eg", "Australia": "au", "Congo DR": "cd", "Iraq": "iq", "Portugal": "pt", "Croatia": "hr",
             "Qatar": "qa", "Sweden": "se", "Ivory Coast": "ci", "Ecuador": "ec", "Korea Republic": "kr", "Haiti": "ht", "England": "gb-eng", "Spain": "es",
@@ -64,6 +56,16 @@
             "Norway": "no", "Jordan": "jo", "Paraguay": "py", "Saudi Arabia": "sa", "South Africa": "za", "Iran": "ir", "Brazil": "br", "Belgium": "be",
             "Scotland": "gb-sct", "Curacao": "cw", "Panama": "pa", "Czech Republic": "cz", "Tunisia": "tn", "New Zealand": "nz", "Argentina": "ar", "Morocco": "ma",
             "Turkey": "tr", "Bosnia & Herzegovina": "ba", "Uzbekistan": "uz", "Ghana": "gh", "Cape Verde": "cv", "USA": "us", "Germany": "de", "Netherlands": "nl"
+        };
+
+        // Sofascore's unique internal team identity numbers mapped for your roster roster group
+        const sofascoreTeamIds = {
+            "Mexico": 4768, "South Africa": 4771, "Canada": 4765, "Algeria": 4777, "Korea Republic": 4744, "Czech Republic": 4712, "France": 4481, "Brazil": 4748,
+            "Portugal": 4704, "Croatia": 4711, "Qatar": 4752, "Sweden": 4709, "Ivory Coast": 4776, "Ecuador": 4764, "Haiti": 4784, "England": 4479, "Spain": 4698,
+            "Switzerland": 4707, "Senegal": 4774, "Austria": 4714, "Uruguay": 4761, "Japan": 4743, "Colombia": 4762, "Norway": 4701, "Jordan": 4742,
+            "Paraguay": 4760, "Saudi Arabia": 4746, "South Africa": 4771, "Iran": 4745, "Belgium": 4697, "Scotland": 4696, "Curacao": 5262, "Panama": 4783,
+            "Tunisia": 4773, "New Zealand": 4787, "Argentina": 4758, "Morocco": 4772, "Turkey": 4703, "Bosnia & Herzegovina": 4713, "Uzbekistan": 4741,
+            "Ghana": 4775, "Cape Verde": 4831, "USA": 4766, "Germany": 4705, "Netherlands": 4700, "Egypt": 4778, "Australia": 4747, "Iraq": 4739, "Congo DR": 4781
         };
 
         const sweepstakeData = [
@@ -77,7 +79,7 @@
 
         const API_KEY = "64728c7362msh877fb4fa9f8687dp1e1476jsncf45c0b51895";
         const SOFASCORE_HOST = "sofascore.p.rapidapi.com";
-        const WORLD_CUP_UNIQUE_ID = 16; // Sofascore's internal tag identifier for the FIFA World Cup tournament
+        const FIFA_WORLD_CUP_UNIQUE_ID = 16;
 
         function getOwner(teamName) {
             const found = sweepstakeData.find(p => p.teams.includes(teamName));
@@ -97,7 +99,7 @@
             });
         });
 
-        function buildFixtureHTML(match, matchDate) {
+        function buildFixtureHTML(match, timeString) {
             const homeFlag = getFlagImg(match.home);
             const awayFlag = getFlagImg(match.away);
 
@@ -111,19 +113,19 @@
             return `
                 <div class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3">
                     <div class="flex items-center justify-between w-full text-xs text-slate-400">
-                        <span>Kickoff: ${matchDate.toLocaleDateString('en-GB', {day:'numeric', month:'short'})} ${matchDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}</span>
+                        <span>Kickoff: ${timeString}</span>
                         ${statusBadge}
                     </div>
                     <div class="flex justify-between items-center w-full px-2">
                         <div class="text-center w-5/12">
-                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${homeFlag}${match.home}</p>
+                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${homeFlag} ${match.home}</p>
                             <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${getOwner(match.home)}</p>
                         </div>
                         <div class="w-2/12 text-center font-mono font-black text-lg text-emerald-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700/40">
                             ${match.homeScore}-${match.awayScore}
                         </div>
                         <div class="text-center w-5/12">
-                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${awayFlag}${match.away}</p>
+                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${awayFlag} ${match.away}</p>
                             <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${getOwner(match.away)}</p>
                         </div>
                     </div>
@@ -131,58 +133,47 @@
             `;
         }
 
-        async function fetchSofascoreMatches(dateObject) {
-            const yyyy = dateObject.getFullYear();
-            const mm = String(dateObject.getMonth() + 1).padStart(2, '0');
-            const dd = String(dateObject.getDate()).padStart(2, '0');
-            const formattedDate = `${yyyy}-${mm}-${dd}`;
+        async function syncRosterFixtures() {
+            // Loop over all our sweepstake teams to check schedules on parallel endpoints
+            const uniqueTeams = Object.keys(sofascoreTeamIds);
+            let activeMatchMap = new Map();
 
-            const url = `https://${SOFASCORE_HOST}/matches/get-by-date?date=${formattedDate}`;
-            const options = {
-                method: 'GET',
-                headers: {
-                    'X-RapidAPI-Key': API_KEY,
-                    'X-RapidAPI-Host': SOFASCORE_HOST
+            // We look up a core subset of teams to fetch running game logs without blowing rate limits
+            const fetchPromises = uniqueTeams.slice(0, 15).map(async (teamName) => {
+                const teamId = sofascoreTeamIds[teamName];
+                const url = `https://${SOFASCORE_HOST}/teams/get-next-matches?teamId=${teamId}&pageIndex=0`;
+                const options = {
+                    method: 'GET',
+                    headers: { 'X-RapidAPI-Key': API_KEY, 'X-RapidAPI-Host': SOFASCORE_HOST }
+                };
+
+                try {
+                    const response = await fetch(url, options);
+                    const data = await response.json();
+                    const events = data.events || [];
+
+                    events.forEach(event => {
+                        if(event.tournament && event.tournament.uniqueId === FIFA_WORLD_CUP_UNIQUE_ID) {
+                            activeMatchMap.set(event.id, event);
+                        }
+                    });
+                } catch (e) {
+                    console.error(e);
                 }
-            };
+            });
 
-            try {
-                const response = await fetch(url, options);
-                const data = await response.json();
-                const events = data.events || [];
-                // Map out strictly tournament events that align with the World Cup signature tag
-                return events.filter(event => event.tournament && event.tournament.uniqueId === WORLD_CUP_UNIQUE_ID);
-            } catch (error) {
-                console.error("Sofascore processing failure:", error);
-                return [];
-            }
-        }
+            await Promise.all(fetchPromises);
 
-        async function initDashboard() {
-            const today = new Date();
-            const tomorrow = new Date();
-            tomorrow.setDate(today.getDate() + 1);
+            let fixturesHTML = '';
+            const now = new Date();
 
-            const [todayEvents, tomorrowEvents] = await Promise.all([
-                fetchSofascoreMatches(today),
-                fetchSofascoreMatches(tomorrow)
-            ]);
-
-            const nowMs = Date.now();
-            const oneDayMs = 24 * 60 * 60 * 1000;
-
-            let todayHTML = '';
-            let tomorrowHTML = '';
-
-            // Handle active data array streams
-            const allEvents = [...todayEvents, ...tomorrowEvents];
-
-            allEvents.forEach(event => {
+            activeMatchMap.forEach(event => {
                 const homeTeam = event.homeTeam.name;
                 const awayTeam = event.awayTeam.name;
                 const homeScore = event.homeScore?.current ?? 0;
                 const awayScore = event.awayScore?.current ?? 0;
 
+                // Tabulate live goal metrics across sweep matrix structures
                 if (teamStats[homeTeam]) {
                     teamStats[homeTeam].scored += homeScore;
                     teamStats[homeTeam].conceded += awayScore;
@@ -193,29 +184,15 @@
                 }
 
                 const matchDate = new Date(event.startTimestamp * 1000);
-                const diffMs = matchDate.getTime() - nowMs;
+                const timeStr = matchDate.toLocaleDateString('en-GB', {day:'numeric', month:'short'}) + " " + matchDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
 
-                const isNext24h = diffMs >= -3 * 60 * 60 * 1000 && diffMs <= oneDayMs;
-                const isNext48h = diffMs > oneDayMs && diffMs <= (oneDayMs * 2);
-
-                const matchObj = {
-                    home: homeTeam,
-                    away: awayTeam,
-                    homeScore: homeScore,
-                    awayScore: awayScore,
-                    status: event.status.type
-                };
-
-                if (isNext24h) {
-                    todayHTML += buildFixtureHTML(matchObj, matchDate);
-                } else if (isNext48h) {
-                    tomorrowHTML += buildFixtureHTML(matchObj, matchDate);
-                }
+                // Render match element card inside timeframe layout structures
+                fixturesHTML += buildFixtureHTML({
+                    home: homeTeam, away: awayTeam, homeScore: homeScore, awayScore: awayScore, status: event.status.type
+                }, timeStr);
             });
 
-            document.getElementById('today-fixtures').innerHTML = todayHTML || `<p class="text-slate-500 text-xs italic py-2">No matches scheduled within the next 24 hours.</p>`;
-            document.getElementById('tomorrow-fixtures').innerHTML = tomorrowHTML || `<p class="text-slate-500 text-xs italic py-2">No matches scheduled inside this window.</p>`;
-
+            document.getElementById('sweepstake-fixtures').innerHTML = fixturesHTML || `<p class="text-slate-500 text-xs italic py-2">No active matches parsed inside roster timeline.</p>`;
             renderDashboard();
         }
 
@@ -249,7 +226,7 @@
             });
         }
 
-        initDashboard();
+        syncRosterFixtures();
     </script>
 </body>
 </html>
