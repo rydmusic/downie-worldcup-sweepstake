@@ -63,13 +63,25 @@
 
         const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?output=csv";
 
+        // 🧠 BULLETPROOF LOOKUP METHOD: Strips spaces, symbols, and casing to ensure an absolute match
+        function cleanString(str) {
+            return str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+        }
+
         function getOwner(teamName) {
-            const found = sweepstakeData.find(p => p.teams.includes(teamName));
+            const cleanTarget = cleanString(teamName);
+            const found = sweepstakeData.find(p => 
+                p.teams.some(t => cleanString(t) === cleanTarget || cleanString(t).includes(cleanTarget) || cleanTarget.includes(cleanString(t)))
+            );
             return found ? found.player : "No Owner";
         }
 
         function getFlagImg(teamName) {
-            const code = countryCodes[teamName.trim()];
+            const cleanTarget = cleanString(teamName);
+            // Search the flag database keys using the same bulletproof strategy
+            const key = Object.keys(countryCodes).find(k => cleanString(k) === cleanTarget);
+            const code = key ? countryCodes[key] : null;
+            
             if (!code) return `<span class="mr-2">🏳️</span>`;
             return `<img src="https://flagcdn.com/16x12/${code}.png" class="inline mr-2 shadow-sm rounded-xs border border-slate-700" alt="" style="vertical-align: middle; display: inline-block;" />`;
         }
@@ -99,13 +111,17 @@
                         const status = cols[4] ? cols[4].trim() : 'UPCOMING';
                         const kickoff = cols[5] ? cols[5].trim() : '--:--';
 
-                        if (teamStats[home]) {
-                            teamStats[home].scored += homeScore;
-                            teamStats[home].conceded += awayScore;
+                        // Dynamic stats matching using normalized name tags
+                        const homeKey = Object.keys(teamStats).find(k => cleanString(k) === cleanString(home));
+                        const awayKey = Object.keys(teamStats).find(k => cleanString(k) === cleanString(away));
+
+                        if (homeKey) {
+                            teamStats[homeKey].scored += homeScore;
+                            teamStats[homeKey].conceded += awayScore;
                         }
-                        if (teamStats[away]) {
-                            teamStats[away].scored += awayScore;
-                            teamStats[away].conceded += homeScore;
+                        if (awayKey) {
+                            teamStats[awayKey].scored += awayScore;
+                            teamStats[awayKey].conceded += homeScore;
                         }
 
                         let statusBadge = `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono font-bold">${status}</span>`;
