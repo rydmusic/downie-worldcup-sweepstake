@@ -27,17 +27,31 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
-        <!-- Today's Matches Live Ticker -->
+        <!-- Today & Tomorrow Match Ticker -->
         <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 
-                    Today's Fixtures & Sweeps
+                    Upcoming Fixtures & Sweeps (Today & Tomorrow)
                 </h3>
-                <span id="matchday-date" class="text-xs text-slate-400 font-mono"></span>
             </div>
-            <div id="fixtures-container" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p class="text-slate-400 text-sm italic col-span-2 text-center py-4">Checking today's schedule...</p>
+            
+            <div class="p-4 space-y-6">
+                <!-- Today's Section -->
+                <div>
+                    <h4 id="today-heading" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Today</h4>
+                    <div id="today-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p class="text-slate-500 text-xs italic py-2">No matches scheduled for today.</p>
+                    </div>
+                </div>
+
+                <!-- Tomorrow's Section -->
+                <div>
+                    <h4 id="tomorrow-heading" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Tomorrow</h4>
+                    <div id="tomorrow-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p class="text-slate-500 text-xs italic py-2">No matches scheduled for tomorrow.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -64,7 +78,6 @@
         const WORLD_CUP_ID = 1; 
         const TOURNAMENT_SEASON = "2026";
 
-        // Helper function to map a team name back to its sweepstake owner
         function getOwner(teamName) {
             const found = sweepstakeData.find(p => p.teams.includes(teamName));
             return found ? found.player : "No Owner";
@@ -76,6 +89,45 @@
                 teamStats[team] = { scored: 0, conceded: 0 };
             });
         });
+
+        function buildFixtureHTML(match, matchDate) {
+            const homeTeam = match.teams.home.name;
+            const awayTeam = match.teams.away.name;
+            const homeGoals = match.goals.home ?? 0;
+            const awayGoals = match.goals.away ?? 0;
+            const homeOwner = getOwner(homeTeam);
+            const awayOwner = getOwner(awayTeam);
+            const status = match.fixture.status.short;
+
+            let liveStatusBadge = `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono">${status}</span>`;
+            if (['1H','2H','HT'].includes(status)) {
+                liveStatusBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-xs font-mono font-bold animate-pulse">LIVE</span>`;
+            } else if (status === 'FT') {
+                liveStatusBadge = `<span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-xs font-mono">FT</span>`;
+            }
+
+            return `
+                <div class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3">
+                    <div class="flex items-center justify-between w-full text-xs text-slate-400">
+                        <span>Kickoff: ${matchDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}</span>
+                        ${liveStatusBadge}
+                    </div>
+                    <div class="flex justify-between items-center w-full px-2">
+                        <div class="text-center w-5/12">
+                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${homeTeam}</p>
+                            <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${homeOwner}</p>
+                        </div>
+                        <div class="w-2/12 text-center font-mono font-black text-lg text-emerald-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700/40">
+                            ${homeGoals}-${awayGoals}
+                        </div>
+                        <div class="text-center w-5/12">
+                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${awayTeam}</p>
+                            <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${awayOwner}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
         async function fetchLiveScores() {
             const url = `https://api-football-v1.p.rapidapi.com/v3/fixtures?league=${WORLD_CUP_ID}&season=${TOURNAMENT_SEASON}`;
@@ -92,15 +144,16 @@
                 const result = await response.json();
                 const matches = result.response || [];
 
-                // Get today's local date parameters
+                // Calendar variables for matching
                 const today = new Date();
-                const todayDay = today.getDate();
-                const todayMonth = today.getMonth();
-                const todayYear = today.getFullYear();
+                const tomorrow = new Date();
+                tomorrow.setDate(today.getDate() + 1);
 
-                document.getElementById('matchday-date').innerText = today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+                document.getElementById('today-heading').innerText = `Today (${today.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'})})`;
+                document.getElementById('tomorrow-heading').innerText = `Tomorrow (${tomorrow.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'})})`;
 
-                let todayMatchesHTML = '';
+                let todayHTML = '';
+                let tomorrowHTML = '';
 
                 matches.forEach(match => {
                     if (match.goals && match.teams) {
@@ -109,7 +162,7 @@
                         const homeGoals = match.goals.home ?? 0;
                         const awayGoals = match.goals.away ?? 0;
 
-                        // Process running tournament statistics
+                        // Process score metrics globally
                         if (teamStats[homeTeam]) {
                             teamStats[homeTeam].scored += homeGoals;
                             teamStats[homeTeam].conceded += awayGoals;
@@ -119,55 +172,31 @@
                             teamStats[awayTeam].conceded += homeGoals;
                         }
 
-                        // Robust timezone date check
+                        // Determine date alignment
                         const matchDate = new Date(match.fixture.date);
-                        const isMatchToday = matchDate.getDate() === todayDay && 
-                                             matchDate.getMonth() === todayMonth && 
-                                             matchDate.getFullYear() === todayYear;
+                        
+                        const isToday = matchDate.getDate() === today.getDate() &&
+                                        matchDate.getMonth() === today.getMonth() &&
+                                        matchDate.getFullYear() === todayYear;
+                                        
+                        const isTomorrow = matchDate.getDate() === tomorrow.getDate() &&
+                                           matchDate.getMonth() === tomorrow.getMonth() &&
+                                           matchDate.getFullYear() === tomorrow.getFullYear();
 
-                        if (isMatchToday) {
-                            const homeOwner = getOwner(homeTeam);
-                            const awayOwner = getOwner(awayTeam);
-                            const status = match.fixture.status.short;
-                            let liveStatusBadge = `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono">${status}</span>`;
-                            
-                            if (['1H','2H','HT'].includes(status)) {
-                                liveStatusBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-xs font-mono font-bold animate-pulse">LIVE</span>`;
-                            } else if (status === 'FT') {
-                                liveStatusBadge = `<span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-xs font-mono">FT</span>`;
-                            }
-
-                            todayMatchesHTML += `
-                                <div class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3">
-                                    <div class="flex items-center justify-between w-full text-xs text-slate-400">
-                                        <span>Kickoff: ${matchDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}</span>
-                                        ${liveStatusBadge}
-                                    </div>
-                                    <div class="flex justify-between items-center w-full px-2">
-                                        <div class="text-center w-5/12">
-                                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${homeTeam}</p>
-                                            <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${homeOwner}</p>
-                                        </div>
-                                        <div class="w-2/12 text-center font-mono font-black text-lg text-emerald-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700/40">
-                                            ${homeGoals}-${awayGoals}
-                                        </div>
-                                        <div class="text-center w-5/12">
-                                            <p class="font-bold text-sm md:text-base text-slate-100 truncate">${awayTeam}</p>
-                                            <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${awayOwner}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
+                        if (matchDate.toDateString() === today.toDateString()) {
+                            todayHTML += buildFixtureHTML(match, matchDate);
+                        } else if (matchDate.toDateString() === tomorrow.toDateString()) {
+                            tomorrowHTML += buildFixtureHTML(match, matchDate);
                         }
                     }
                 });
 
-                const fixturesContainer = document.getElementById('fixtures-container');
-                fixturesContainer.innerHTML = todayMatchesHTML || `<p class="text-slate-400 text-sm italic col-span-2 text-center py-4">No World Cup games scheduled for today!</p>`;
+                if (todayHTML) document.getElementById('today-fixtures').innerHTML = todayHTML;
+                if (tomorrowHTML) document.getElementById('tomorrow-fixtures').innerHTML = tomorrowHTML;
 
                 renderDashboard();
             } catch (error) {
-                document.getElementById('matrix-grid').innerHTML = `<p class="text-red-400 col-span-3 text-center">Failed to load live data. Check configuration token.</p>`;
+                document.getElementById('matrix-grid').innerHTML = `<p class="text-red-400 col-span-3 text-center">Failed to load live data. Check parameters.</p>`;
                 console.error(error);
             }
         }
