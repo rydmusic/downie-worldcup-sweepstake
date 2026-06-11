@@ -53,20 +53,16 @@
             </div>
         </div>
 
-        <!-- VIEW 2: Group Tables Matrix (Hidden by default) -->
-        <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Group tables insert dynamically here -->
-        </div>
+        <!-- VIEW 2: Group Tables Matrix -->
+        <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-        <!-- VIEW 3: Sweepstake Splits Roster Matrix (Hidden by default) -->
-        <div id="view-splits" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Player team listings insert dynamically here -->
-        </div>
+        <!-- VIEW 3: Sweepstake Splits Roster Matrix -->
+        <div id="view-splits" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-        <!-- 🏆 Global Top 5 Leaderboards -->
+        <!-- Global Top 5 Leaderboards -->
         <div id="leaderboard-section" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
             
-            <!-- 🔥 Top 5 Attacking Teams -->
+            <!-- Top 5 Attacking Teams -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                 <div class="p-4 bg-emerald-500/10 border-b border-slate-700">
                     <h3 class="font-bold text-base text-emerald-400 flex items-center gap-2">🔥 Top 5 Attacking Teams</h3>
@@ -88,7 +84,7 @@
                 </div>
             </div>
 
-            <!-- 🛡️ Top 5 Defending Teams (Most Conceded) -->
+            <!-- Top 5 Defending Teams -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                 <div class="p-4 bg-red-500/10 border-b border-slate-700">
                     <h3 class="font-bold text-base text-red-400 flex items-center gap-2">🥅 Top 5 Most Conceded</h3>
@@ -123,6 +119,16 @@
             "Turkey": "tr", "Bosnia & Herzegovina": "ba", "Uzbekistan": "uz", "Ghana": "gh", "Cape Verde": "cv", "USA": "us", "Germany": "de", "Netherlands": "nl"
         };
 
+        // 🖼️ Managed Player Asset Table (Ryan's Live production link integrated)
+        const playerAvatars = {
+            "Archie": "PASTE_ARCHIE_IMAGE_ID_HERE",
+            "Bea":     "PASTE_BEA_IMAGE_ID_HERE",
+            "Craig":   "PASTE_CRAIG_IMAGE_ID_HERE",
+            "Emily":   "PASTE_EMILY_IMAGE_ID_HERE",
+            "Laura":   "PASTE_LAURA_IMAGE_ID_HERE",
+            "Ryan":    "1xuQEf6L0V0Juj_9VA3ySfa_gmFqXPYrT"
+        };
+
         const sweepstakeData = [
           { player: "Archie", teams: ["Algeria", "Canada", "Egypt", "Australia", "Congo DR", "Iraq", "Portugal", "Croatia"] },
           { player: "Bea", teams: ["Qatar", "Sweden", "Ivory Coast", "Ecuador", "Korea Republic", "Haiti", "England", "Spain"] },
@@ -145,6 +151,21 @@
                 p.teams.some(t => cleanString(t) === cleanTarget || cleanString(t).includes(cleanTarget) || cleanTarget.includes(cleanString(t)))
             );
             return found ? found.player : "No Owner";
+        }
+
+        function getOwnerBadge(playerName) {
+            if (playerName === "No Owner") return `<span class="text-slate-500 text-[10px] font-bold">🏳️ NO OWNER</span>`;
+            const id = playerAvatars[playerName];
+            
+            if (id && !id.startsWith("PASTE_")) {
+                return `
+                    <span class="inline-flex items-center gap-1.5 bg-slate-900/80 px-2 py-0.5 rounded-full border border-slate-700">
+                        <img src="https://lh3.googleusercontent.com/d/${id}" class="w-4 h-4 rounded-full object-cover border border-slate-600 shadow-xs" alt="" />
+                        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wide">${playerName}</span>
+                    </span>
+                `;
+            }
+            return `<span class="text-[10px] text-amber-400 font-bold uppercase tracking-wide">👤 ${playerName}</span>`;
         }
 
         function getFlagImg(teamName) {
@@ -238,14 +259,14 @@
                                 <div class="flex justify-between items-center w-full px-2">
                                     <div class="text-center w-5/12">
                                         <p class="font-bold text-sm md:text-base text-slate-100 truncate">${getFlagImg(home)}${home}</p>
-                                        <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${getOwner(home)}</p>
+                                        <div class="mt-1">${getOwnerBadge(getOwner(home))}</div>
                                     </div>
                                     <div class="w-2/12 text-center font-mono font-black text-lg text-emerald-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-700/40">
                                         ${homeScore}-${awayScore}
                                     </div>
                                     <div class="text-center w-5/12">
                                         <p class="font-bold text-sm md:text-base text-slate-100 truncate">${getFlagImg(away)}${away}</p>
-                                        <p class="text-[10px] text-amber-400 font-medium tracking-wide uppercase mt-0.5">👤 ${getOwner(away)}</p>
+                                        <div class="mt-1">${getOwnerBadge(getOwner(away))}</div>
                                     </div>
                                 </div>
                             </div>
@@ -328,23 +349,19 @@
             }
         }
 
-        // 🧠 GLOBAL TOP 5 LEADERBOARD GENERATION WITH ALPHABETICAL TIEBREAKER
         function renderGlobalLeaderboards() {
             const allTeams = Object.values(teamStats);
 
-            // 1. Compile and Sort Top 5 Attacking Teams
             const attackingSorted = [...allTeams].sort((a, b) => {
-                if (b.scored !== a.scored) return b.scored - a.scored; // Sort by highest goals scored
-                return a.name.localeCompare(b.name); // Tiebreaker: Alphabetical Order (A to Z)
+                if (b.scored !== a.scored) return b.scored - a.scored;
+                return a.name.localeCompare(b.name);
             }).slice(0, 5);
 
-            // 2. Compile and Sort Top 5 Defending Teams (Most Conceded)
             const defendingSorted = [...allTeams].sort((a, b) => {
-                if (b.conceded !== a.conceded) return b.conceded - a.conceded; // Sort by highest goals conceded
-                return a.name.localeCompare(b.name); // Tiebreaker: Alphabetical Order (A to Z)
+                if (b.conceded !== a.conceded) return b.conceded - a.conceded;
+                return a.name.localeCompare(b.name);
             }).slice(0, 5);
 
-            // Render Attacking List
             const attackTbody = document.getElementById('attacking-leaderboard-body');
             attackTbody.innerHTML = '';
             attackingSorted.forEach((team, index) => {
@@ -352,13 +369,12 @@
                     <tr class="hover:bg-slate-700/20 transition-colors">
                         <td class="px-4 py-2.5 text-center font-mono font-bold text-slate-400">${index + 1}</td>
                         <td class="px-4 py-2.5 font-medium">${getFlagImg(team.name)} ${team.name}</td>
-                        <td class="px-4 py-2.5 text-xs text-amber-400 font-bold uppercase tracking-wide">👤 ${team.owner}</td>
+                        <td class="px-4 py-2.5">${getOwnerBadge(team.owner)}</td>
                         <td class="px-4 py-2.5 text-center font-mono font-bold text-emerald-400">${team.scored}</td>
                     </tr>
                 `;
             });
 
-            // Render Defending List
             const defendTbody = document.getElementById('defending-leaderboard-body');
             defendTbody.innerHTML = '';
             defendingSorted.forEach((team, index) => {
@@ -366,7 +382,7 @@
                     <tr class="hover:bg-slate-700/20 transition-colors">
                         <td class="px-4 py-2.5 text-center font-mono font-bold text-slate-400">${index + 1}</td>
                         <td class="px-4 py-2.5 font-medium">${getFlagImg(team.name)} ${team.name}</td>
-                        <td class="px-4 py-2.5 text-xs text-amber-400 font-bold uppercase tracking-wide">👤 ${team.owner}</td>
+                        <td class="px-4 py-2.5">${getOwnerBadge(team.owner)}</td>
                         <td class="px-4 py-2.5 text-center font-mono font-bold text-red-400">${team.conceded}</td>
                     </tr>
                 `;
@@ -380,7 +396,9 @@
             sweepstakeData.forEach(playerData => {
                 let playerCard = `
                     <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-md">
-                        <h2 class="text-xl font-bold text-amber-400 border-b border-slate-700 pb-2 mb-3">${playerData.player}</h2>
+                        <div class="flex items-center gap-3 border-b border-slate-700 pb-2 mb-3">
+                            <h2 class="text-xl font-bold text-amber-400">${playerData.player}</h2>
+                        </div>
                         <ul class="space-y-2">
                 `;
                 
