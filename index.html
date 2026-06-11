@@ -36,14 +36,14 @@
                 <div>
                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Playing Today / Next 24h</h4>
                     <div id="today-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <p class="text-slate-500 text-xs italic py-2">No matches scheduled within the next 24 hours.</p>
+                        <p class="text-slate-500 text-xs italic py-2">Syncing live games with Sofascore...</p>
                     </div>
                 </div>
 
                 <div>
                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Playing Tomorrow / Next 48h</h4>
                     <div id="tomorrow-fixtures" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <p class="text-slate-500 text-xs italic py-2">No matches scheduled inside this window.</p>
+                        <p class="text-slate-500 text-xs italic py-2">Syncing upcoming schedule with Sofascore...</p>
                     </div>
                 </div>
             </div>
@@ -51,12 +51,12 @@
 
         <h3 class="font-bold text-lg text-slate-300 pt-4">Standings Dashboard</h3>
         <div id="matrix-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <p class="text-slate-400 animate-pulse col-span-3 text-center py-12">Connecting to live sports database...</p>
+            <p class="text-slate-400 animate-pulse col-span-3 text-center py-12">Connecting to Sofascore data pipelines...</p>
         </div>
     </main>
 
     <script>
-        // Mapping team names to standard 2-letter ISO codes for graphics
+        // Mapping team names to standard 2-letter ISO codes for crisp graphics
         const countryCodes = {
             "Algeria": "dz", "Canada": "ca", "Egypt": "eg", "Australia": "au", "Congo DR": "cd", "Iraq": "iq", "Portugal": "pt", "Croatia": "hr",
             "Qatar": "qa", "Sweden": "se", "Ivory Coast": "ci", "Ecuador": "ec", "Korea Republic": "kr", "Haiti": "ht", "England": "gb-eng", "Spain": "es",
@@ -75,9 +75,9 @@
           { player: "Ryan", teams: ["Turkey", "Bosnia & Herzegovina", "Uzbekistan", "Ghana", "Cape Verde", "USA", "Germany", "Netherlands"] }
         ];
 
-        const API_KEY = "64728c7362msh877fb4fa9f8687dp1e1476jsncf45c0b51895"; 
-        const WORLD_CUP_ID = 1; 
-        const TOURNAMENT_SEASON = "2026";
+        const API_KEY = "64728c7362msh877fb4fa9f8687dp1e1476jsncf45c0b51895";
+        const SOFASCORE_HOST = "sofascore.p.rapidapi.com";
+        const WORLD_CUP_UNIQUE_ID = 16; // Sofascore's internal tag identifier for the FIFA World Cup tournament
 
         function getOwner(teamName) {
             const found = sweepstakeData.find(p => p.teams.includes(teamName));
@@ -101,18 +101,18 @@
             const homeFlag = getFlagImg(match.home);
             const awayFlag = getFlagImg(match.away);
 
-            let liveStatusBadge = `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono font-bold">${match.status}</span>`;
-            if (['1H','2H','HT'].includes(match.status)) {
-                liveStatusBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-xs font-mono font-bold animate-pulse">LIVE</span>`;
-            } else if (match.status === 'FT') {
-                liveStatusBadge = `<span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-xs font-mono font-bold">FT</span>`;
+            let statusBadge = `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono font-bold">${match.status}</span>`;
+            if (match.status === 'inprogress') {
+                statusBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-xs font-mono font-bold animate-pulse">LIVE</span>`;
+            } else if (match.status === 'finished') {
+                statusBadge = `<span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-xs font-mono font-bold">FT</span>`;
             }
 
             return `
                 <div class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3">
                     <div class="flex items-center justify-between w-full text-xs text-slate-400">
                         <span>Kickoff: ${matchDate.toLocaleDateString('en-GB', {day:'numeric', month:'short'})} ${matchDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})}</span>
-                        ${liveStatusBadge}
+                        ${statusBadge}
                     </div>
                     <div class="flex justify-between items-center w-full px-2">
                         <div class="text-center w-5/12">
@@ -131,74 +131,92 @@
             `;
         }
 
-        async function fetchLiveScores() {
-            const url = `https://api-football-v1.p.rapidapi.com/v3/fixtures?league=${WORLD_CUP_ID}&season=${TOURNAMENT_SEASON}`;
+        async function fetchSofascoreMatches(dateObject) {
+            const yyyy = dateObject.getFullYear();
+            const mm = String(dateObject.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObject.getDate()).padStart(2, '0');
+            const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+            const url = `https://${SOFASCORE_HOST}/matches/get-by-date?date=${formattedDate}`;
             const options = {
                 method: 'GET',
                 headers: {
                     'X-RapidAPI-Key': API_KEY,
-                    'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+                    'X-RapidAPI-Host': SOFASCORE_HOST
                 }
             };
 
             try {
                 const response = await fetch(url, options);
-                const result = await response.json();
-                const matches = result.response || [];
-
-                const nowMs = Date.now();
-                const oneDayMs = 24 * 60 * 60 * 1000;
-
-                let todayHTML = '';
-                let tomorrowHTML = '';
-
-                matches.forEach(match => {
-                    if (match.goals && match.teams) {
-                        const homeTeam = match.teams.home.name;
-                        const awayTeam = match.teams.away.name;
-                        const homeGoals = match.goals.home ?? 0;
-                        const awayGoals = match.goals.away ?? 0;
-
-                        if (teamStats[homeTeam]) {
-                            teamStats[homeTeam].scored += homeGoals;
-                            teamStats[homeTeam].conceded += awayGoals;
-                        }
-                        if (teamStats[awayTeam]) {
-                            teamStats[awayTeam].scored += awayGoals;
-                            teamStats[awayTeam].conceded += homeGoals;
-                        }
-
-                        const matchDate = new Date(match.fixture.date);
-                        const diffMs = matchDate.getTime() - nowMs;
-
-                        // Rolling timeframe checks
-                        const isNext24h = diffMs >= -3 * 60 * 60 * 1000 && diffMs <= oneDayMs; 
-                        const isNext48h = diffMs > oneDayMs && diffMs <= (oneDayMs * 2);
-
-                        const matchObj = {
-                            home: homeTeam,
-                            away: awayTeam,
-                            homeScore: homeGoals,
-                            awayScore: awayGoals,
-                            status: match.fixture.status.short
-                        };
-
-                        if (isNext24h) {
-                            todayHTML += buildFixtureHTML(matchObj, matchDate);
-                        } else if (isNext48h) {
-                            tomorrowHTML += buildFixtureHTML(matchObj, matchDate);
-                        }
-                    }
-                });
-
-                if (todayHTML) document.getElementById('today-fixtures').innerHTML = todayHTML;
-                if (tomorrowHTML) document.getElementById('tomorrow-fixtures').innerHTML = tomorrowHTML;
-
-                renderDashboard();
+                const data = await response.json();
+                const events = data.events || [];
+                // Map out strictly tournament events that align with the World Cup signature tag
+                return events.filter(event => event.tournament && event.tournament.uniqueId === WORLD_CUP_UNIQUE_ID);
             } catch (error) {
-                document.getElementById('matrix-grid').innerHTML = `<p class="text-red-400 col-span-3 text-center">Failed to load live data. Check parameters.</p>`;
-                console.error(error);
+                console.error("Sofascore processing failure:", error);
+                return [];
             }
+        }
+
+        async function initDashboard() {
+            const today = new Date();
+            const tomorrow = new Date();
+            tomorrow.setDate(today.getDate() + 1);
+
+            const [todayEvents, tomorrowEvents] = await Promise.all([
+                fetchSofascoreMatches(today),
+                fetchSofascoreMatches(tomorrow)
+            ]);
+
+            const nowMs = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+
+            let todayHTML = '';
+            let tomorrowHTML = '';
+
+            // Handle active data array streams
+            const allEvents = [...todayEvents, ...tomorrowEvents];
+
+            allEvents.forEach(event => {
+                const homeTeam = event.homeTeam.name;
+                const awayTeam = event.awayTeam.name;
+                const homeScore = event.homeScore?.current ?? 0;
+                const awayScore = event.awayScore?.current ?? 0;
+
+                if (teamStats[homeTeam]) {
+                    teamStats[homeTeam].scored += homeScore;
+                    teamStats[homeTeam].conceded += awayScore;
+                }
+                if (teamStats[awayTeam]) {
+                    teamStats[awayTeam].scored += awayScore;
+                    teamStats[awayTeam].conceded += homeScore;
+                }
+
+                const matchDate = new Date(event.startTimestamp * 1000);
+                const diffMs = matchDate.getTime() - nowMs;
+
+                const isNext24h = diffMs >= -3 * 60 * 60 * 1000 && diffMs <= oneDayMs;
+                const isNext48h = diffMs > oneDayMs && diffMs <= (oneDayMs * 2);
+
+                const matchObj = {
+                    home: homeTeam,
+                    away: awayTeam,
+                    homeScore: homeScore,
+                    awayScore: awayScore,
+                    status: event.status.type
+                };
+
+                if (isNext24h) {
+                    todayHTML += buildFixtureHTML(matchObj, matchDate);
+                } else if (isNext48h) {
+                    tomorrowHTML += buildFixtureHTML(matchObj, matchDate);
+                }
+            });
+
+            document.getElementById('today-fixtures').innerHTML = todayHTML || `<p class="text-slate-500 text-xs italic py-2">No matches scheduled within the next 24 hours.</p>`;
+            document.getElementById('tomorrow-fixtures').innerHTML = tomorrowHTML || `<p class="text-slate-500 text-xs italic py-2">No matches scheduled inside this window.</p>`;
+
+            renderDashboard();
         }
 
         function renderDashboard() {
@@ -231,7 +249,7 @@
             });
         }
 
-        fetchLiveScores();
+        initDashboard();
     </script>
 </body>
 </html>
