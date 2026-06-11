@@ -63,7 +63,6 @@
     </main>
 
     <script>
-        // Data compiled from your photo
         const sweepstakeData = [
           { player: "Archie", teams: ["Algeria", "Canada", "Egypt", "Australia", "Congo DR", "Iraq", "Portugal", "Croatia"] },
           { player: "Bea", teams: ["Qatar", "Sweden", "Ivory Coast", "Ecuador", "Korea Republic", "Haiti", "England", "Spain"] },
@@ -73,7 +72,6 @@
           { player: "Ryan", teams: ["Turkey", "Bosnia & Herzegovina", "Uzbekistan", "Ghana", "Cape Verde", "USA", "Germany", "Netherlands"] }
         ];
 
-        // API Setup
         const API_KEY = "64728c7362msh877fb4fa9f8687dp1e1476jsncf45c0b51895"; 
         const WORLD_CUP_ID = 1; 
         const TOURNAMENT_SEASON = "2026";
@@ -144,7 +142,6 @@
                 const result = await response.json();
                 const matches = result.response || [];
 
-                // Calendar variables for matching
                 const today = new Date();
                 const tomorrow = new Date();
                 tomorrow.setDate(today.getDate() + 1);
@@ -162,7 +159,6 @@
                         const homeGoals = match.goals.home ?? 0;
                         const awayGoals = match.goals.away ?? 0;
 
-                        // Process score metrics globally
                         if (teamStats[homeTeam]) {
                             teamStats[homeTeam].scored += homeGoals;
                             teamStats[homeTeam].conceded += awayGoals;
@@ -172,20 +168,19 @@
                             teamStats[awayTeam].conceded += homeGoals;
                         }
 
-                        // Determine date alignment
                         const matchDate = new Date(match.fixture.date);
                         
                         const isToday = matchDate.getDate() === today.getDate() &&
                                         matchDate.getMonth() === today.getMonth() &&
-                                        matchDate.getFullYear() === todayYear;
+                                        matchDate.getFullYear() === today.getFullYear();
                                         
                         const isTomorrow = matchDate.getDate() === tomorrow.getDate() &&
                                            matchDate.getMonth() === tomorrow.getMonth() &&
                                            matchDate.getFullYear() === tomorrow.getFullYear();
 
-                        if (matchDate.toDateString() === today.toDateString()) {
+                        if (isToday) {
                             todayHTML += buildFixtureHTML(match, matchDate);
-                        } else if (matchDate.toDateString() === tomorrow.toDateString()) {
+                        } else if (isTomorrow) {
                             tomorrowHTML += buildFixtureHTML(match, matchDate);
                         }
                     }
