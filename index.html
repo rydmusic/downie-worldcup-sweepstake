@@ -55,6 +55,20 @@
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                     <h3 class="font-bold text-base text-slate-200 flex items-center gap-2">
+                        📰 BBC Sport Live Football News
+                    </h3>
+                    <span class="text-xs text-emerald-400 font-mono flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live Feed
+                    </span>
+                </div>
+                <div id="bbc-news-container" class="p-4 space-y-3 max-h-[350px] overflow-y-auto bg-slate-900/40 divide-y divide-slate-800">
+                    <p class="text-slate-400 text-xs italic text-center py-6 animate-pulse">Fetching latest BBC world football wires...</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="font-bold text-base text-slate-200 flex items-center gap-2">
                         🎬 Tournament Highlights & Media Feed
                     </h3>
                 </div>
@@ -163,6 +177,39 @@
 
         const MATCHES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=0&output=csv";
         const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=1430000650&output=csv";
+
+        // 📡 API INTERCEPTOR: Fetches and converts the BBC Sport XML feed into a clean JSON layout block
+        async function fetchBBCNewsFeed() {
+            const container = document.getElementById('bbc-news-container');
+            const targetRSS = "https://feeds.bbci.co.uk/sport/football/rss.xml";
+            const apiProxy = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetRSS)}`;
+
+            try {
+                const response = await fetch(apiProxy);
+                const data = await response.json();
+                
+                if (data.status === 'ok' && data.items.length > 0) {
+                    let newsHTML = '';
+                    data.items.slice(0, 6).forEach(item => { // Display top 6 fresh articles
+                        newsHTML += `
+                            <div class="pt-3 first:pt-0 pb-1 group">
+                                <a href="${item.link}" target="_blank" class="block space-y-1">
+                                    <h4 class="font-bold text-sm text-slate-100 group-hover:text-amber-400 transition-colors leading-snug">${item.title}</h4>
+                                    <p class="text-xs text-slate-400 font-medium leading-relaxed">${item.description || ''}</p>
+                                    <span class="block text-[10px] font-mono text-slate-500 pt-1">🕒 Published: ${new Date(item.pubDate).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})}</span>
+                                </a>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = newsHTML;
+                } else {
+                    container.innerHTML = `<p class="text-slate-500 text-xs italic py-4 text-center">No active wire headlines returned from BBC servers.</p>`;
+                }
+            } catch (error) {
+                console.error("BBC news parsing failed:", error);
+                container.innerHTML = `<p class="text-slate-500 text-xs italic py-4 text-center">Unable to parse the live wire feed right now.</p>`;
+            }
+        }
 
         function sanitizeTeamName(name) {
             if (!name) return "";
@@ -495,6 +542,7 @@
         async function init() {
             await loadMatchesData();
             await loadGroupsData();
+            await fetchBBCNewsFeed(); // Fire the feed compiler asynchronously
         }
 
         init();
