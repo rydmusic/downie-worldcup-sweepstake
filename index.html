@@ -8,7 +8,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
-    <!-- Navbar -->
     <nav class="bg-slate-800 p-4 border-b border-slate-700 shadow-lg">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-wider text-amber-400">🏆 SWEEPSTAKE LIVE</h1>
@@ -16,10 +15,8 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-6xl mx-auto p-6 space-y-6">
         
-        <!-- Prize Rules Dashboard Header -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm bg-slate-800/50 border border-slate-700/60 rounded-xl p-4">
             <div><p class="text-slate-400">🥇 Winner</p><p class="text-lg font-bold text-amber-400">£35</p></div>
             <div><p class="text-slate-400">🥈 Runner Up</p><p class="text-lg font-bold text-slate-300">£10</p></div>
@@ -27,7 +24,6 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
-        <!-- Interactive Navigation Toggle Tabs -->
         <div class="flex flex-wrap border-b border-slate-700 gap-1">
             <button id="tab-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors">
                 ⚽ Live Fixtures (48h)
@@ -43,7 +39,6 @@
             </button>
         </div>
 
-        <!-- VIEW 1: Live Matches Block Container -->
         <div id="view-fixtures" class="space-y-6">
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
                 <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
@@ -57,7 +52,6 @@
                 </div>
             </div>
 
-            <!-- 🎬 NEW: Custom Video Interactive Selector Hub Dashboard -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                     <h3 class="font-bold text-base text-slate-200 flex items-center gap-2">
@@ -65,13 +59,12 @@
                     </h3>
                 </div>
                 <div class="p-4 space-y-4">
-                    <!-- Main Video Screen Layer -->
                     <div class="bg-slate-950 p-1 rounded-lg">
                         <div class="relative w-full pb-[56.25%] h-0 overflow-hidden rounded border border-slate-800">
                             <iframe 
                                 id="main-video-player"
                                 class="absolute top-0 left-0 w-full h-full border-0"
-                                src="https://www.youtube.com/embed/videoseries?list=PL_yESz2YEf4iFtdnLuHsd11jV8EaGLqk6" 
+                                src="https://www.youtube.com/embed/videoseries?list=PLRhC9EroPISn3tubmfHlGsTS0uPKkGc2N" 
                                 title="Tournament Video Screen"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                                 allowfullscreen
@@ -80,7 +73,6 @@
                         </div>
                     </div>
                     
-                    <!-- Interactive Selection Deck Grid (Loads full playlist indexed elements dynamically) -->
                     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
                         <button onclick="changeActiveEmbed(0)" class="group text-left space-y-1.5 focus:outline-none">
                             <div class="relative aspect-video rounded border-2 border-amber-400 bg-slate-900 overflow-hidden flex items-center justify-center font-bold text-xs text-amber-400 shadow-md">
@@ -122,13 +114,10 @@
             </div>
         </div>
 
-        <!-- VIEW 2: Group Tables Matrix -->
         <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-        <!-- VIEW 3: Sweepstake Splits Roster Matrix -->
         <div id="view-splits" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-        <!-- VIEW 4: Full Schedule Archive Block Container -->
         <div id="view-schedule" class="hidden bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide">🏆 Complete Tournament Fixture History</h3>
@@ -138,10 +127,8 @@
             </div>
         </div>
 
-        <!-- Global Top 5 Leaderboards -->
         <div id="leaderboard-section" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
             
-            <!-- Top 5 Attacking Teams -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                 <div class="p-4 bg-emerald-500/10 border-b border-slate-700">
                     <h3 class="font-bold text-base text-emerald-400 flex items-center gap-2">🔥 Top 5 Attacking Teams</h3>
@@ -163,7 +150,6 @@
                 </div>
             </div>
 
-            <!-- Top 5 Defending Teams -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                 <div class="p-4 bg-red-500/10 border-b border-slate-700">
                     <h3 class="font-bold text-base text-red-400 flex items-center gap-2">🥅 Top 5 Most Conceded</h3>
@@ -219,16 +205,13 @@
         const MATCHES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=0&output=csv";
         const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=1430000650&output=csv";
 
-        // 🎛️ Playlist Navigation Control Engine
         function changeActiveEmbed(index) {
             const player = document.getElementById('main-video-player');
-            // Formulates a targeted video pointer directly indexing items 0-4 inside the YouTube playlist parameters
-            player.src = `https://www.youtube.com/embed/videoseries?list=PL_yESz2YEf4iFtdnLuHsd11jV8EaGLqk6&index=${index + 1}&autoplay=1`;
+            player.src = `https://www.youtube.com/embed/videoseries?list=PLRhC9EroPISn3tubmfHlGsTS0uPKkGc2N&index=${index + 1}&autoplay=1`;
             
-            // Adjust visual highlights on our selection controls
             const buttons = document.querySelectorAll('#view-fixtures button');
             buttons.forEach((btn, i) => {
-                if(i > 0) { // Skip the first default status header reference block if present
+                if(i > 0) { 
                     const div = btn.querySelector('div');
                     const p = btn.querySelector('p');
                     if((i - 1) === index) {
