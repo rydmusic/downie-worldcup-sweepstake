@@ -39,15 +39,40 @@
             </button>
         </div>
 
-        <div id="view-fixtures" class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
-            <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
-                <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 
-                    Active 48-Hour Rolling Window
-                </h3>
+        <div id="view-fixtures" class="space-y-6">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
+                <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 
+                        Active 48-Hour Rolling Window
+                    </h3>
+                </div>
+                <div id="fixtures-container" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p class="text-slate-400 text-sm italic col-span-2 text-center py-4">Connecting to live sheets stream...</p>
+                </div>
             </div>
-            <div id="fixtures-container" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p class="text-slate-400 text-sm italic col-span-2 text-center py-4">Connecting to live sheets stream...</p>
+
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="font-bold text-base text-slate-200 flex items-center gap-2">
+                        <span class="flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                        BBC Sport Live Text Stream
+                    </h3>
+                    <a href="https://www.bbc.co.uk/sport/football/live/ce8my95y5g4t" target="_blank" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1">
+                        Open BBC Website ↗
+                    </a>
+                </div>
+                <div class="bg-slate-950 p-1">
+                    <iframe 
+                        src="https://www.bbc.co.uk/sport/football/live/ce8my95y5g4t" 
+                        class="w-full h-[500px] border-0 rounded-lg bg-slate-950"
+                        sandbox="allow-scripts allow-same-origin allow-popups"
+                        loading="lazy">
+                    </iframe>
+                </div>
             </div>
         </div>
 
@@ -142,7 +167,6 @@
         const MATCHES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=0&output=csv";
         const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=1430000650&output=csv";
 
-        // 🧠 DEEP SANITIZATION ENGINE (Forces special variants to match original plain-text arrays)
         function sanitizeTeamName(name) {
             if (!name) return "";
             let cleaned = name.trim();
@@ -293,7 +317,7 @@
                         }
 
                         const cardTemplate = `
-                            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3 shadow-xs">
+                            <div class="bg-slate-850 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3 shadow-xs">
                                 <div class="flex items-center justify-between w-full text-xs text-slate-400">
                                     <span>Kickoff: ${kickoff}</span>
                                     ${statusBadge}
