@@ -8,7 +8,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
-    <!-- Navbar -->
     <nav class="bg-slate-800 p-4 border-b border-slate-700 shadow-lg">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-wider text-amber-400">🏆 SWEEPSTAKE LIVE</h1>
@@ -16,10 +15,8 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-6xl mx-auto p-6 space-y-6">
         
-        <!-- Prize Rules Dashboard Header -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm bg-slate-800/50 border border-slate-700/60 rounded-xl p-4">
             <div><p class="text-slate-400">🥇 Winner</p><p class="text-lg font-bold text-amber-400">£35</p></div>
             <div><p class="text-slate-400">🥈 Runner Up</p><p class="text-lg font-bold text-slate-300">£10</p></div>
@@ -27,7 +24,6 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
-        <!-- 🎛️ Interactive Navigation Toggle Tabs (Added 4th Tab) -->
         <div class="flex flex-wrap border-b border-slate-700 gap-1">
             <button id="tab-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors">
                 ⚽ Live Fixtures (48h)
@@ -43,7 +39,6 @@
             </button>
         </div>
 
-        <!-- VIEW 1: Live Matches Block Container (Strict Rolling 48h Window) -->
         <div id="view-fixtures" class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
@@ -56,13 +51,10 @@
             </div>
         </div>
 
-        <!-- VIEW 2: Group Tables Matrix -->
         <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-        <!-- VIEW 3: Sweepstake Splits Roster Matrix -->
         <div id="view-splits" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-        <!-- 📅 VIEW 4: Full Schedule Archive Block Container (Displays All Match Records) -->
         <div id="view-schedule" class="hidden bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide">🏆 Complete Tournament Fixture History</h3>
@@ -72,10 +64,8 @@
             </div>
         </div>
 
-        <!-- Global Top 5 Leaderboards -->
         <div id="leaderboard-section" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
             
-            <!-- Top 5 Attacking Teams -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                 <div class="p-4 bg-emerald-500/10 border-b border-slate-700">
                     <h3 class="font-bold text-base text-emerald-400 flex items-center gap-2">🔥 Top 5 Attacking Teams</h3>
@@ -97,7 +87,6 @@
                 </div>
             </div>
 
-            <!-- Top 5 Defending Teams -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                 <div class="p-4 bg-red-500/10 border-b border-slate-700">
                     <h3 class="font-bold text-base text-red-400 flex items-center gap-2">🥅 Top 5 Most Conceded</h3>
@@ -153,12 +142,24 @@
         const MATCHES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=0&output=csv";
         const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=1430000650&output=csv";
 
+        // 🧠 DEEP SANITIZATION ENGINE (Forces special variants to match original plain-text arrays)
+        function sanitizeTeamName(name) {
+            if (!name) return "";
+            let cleaned = name.trim();
+            if (cleaned === "Türkiye") return "Turkey";
+            if (cleaned === "Curaçao") return "Curacao";
+            if (cleaned === "Côte d'Ivoire") return "Ivory Coast";
+            if (cleaned === "Cabo Verde") return "Cape Verde";
+            return cleaned;
+        }
+
         function cleanString(str) {
             return str ? str.toLowerCase().replace(/[^a-z0-9]/g, '').trim() : '';
         }
 
         function getOwner(teamName) {
-            const cleanTarget = cleanString(teamName);
+            const normalized = sanitizeTeamName(teamName);
+            const cleanTarget = cleanString(normalized);
             const found = sweepstakeData.find(p => 
                 p.teams.some(t => cleanString(t) === cleanTarget || cleanString(t).includes(cleanTarget) || cleanTarget.includes(cleanString(t)))
             );
@@ -181,7 +182,8 @@
         }
 
         function getFlagImg(teamName) {
-            const cleanTarget = cleanString(teamName);
+            const normalized = sanitizeTeamName(teamName);
+            const cleanTarget = cleanString(normalized);
             const key = Object.keys(countryCodes).find(k => cleanString(k) === cleanTarget);
             const code = key ? countryCodes[key] : null;
             if (!code) return `<span class="mr-2">🏳️</span>`;
@@ -195,7 +197,6 @@
             });
         });
 
-        // 🎛️ Navigation Tab Engine with 4-way support
         function switchTab(view) {
             const fixtView = document.getElementById('view-fixtures');
             const groupView = document.getElementById('view-groups');
@@ -229,12 +230,11 @@
                 btnSplits.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             } else if (view === 'schedule') {
                 scheduleView.classList.remove('hidden');
-                leadSection.classList.remove('hidden'); // Keep Leaderboard active here too
+                leadSection.classList.remove('hidden');
                 btnSchedule.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             }
         }
 
-        // Master parser: Splits single feed source into 48-hour slate AND complete archive
         async function loadMatchesData() {
             try {
                 const response = await fetch(MATCHES_CSV_URL);
@@ -244,7 +244,6 @@
                 let rollingHTML = '';
                 let fullScheduleHTML = '';
 
-                // Calculate strict time windows relative to the exact moment the page renders
                 const now = new Date();
                 const past24h = new Date(now.getTime() - (24 * 60 * 60 * 1000));
                 const future24h = new Date(now.getTime() + (24 * 60 * 60 * 1000));
@@ -252,15 +251,17 @@
                 rows.forEach(row => {
                     const cols = row.split(',');
                     if (cols.length >= 4 && cols[0].trim() !== '') {
-                        const home = cols[0].trim();
-                        const away = cols[1].trim();
+                        let home = cols[0].trim();
+                        let away = cols[1].trim();
+                        
+                        home = sanitizeTeamName(home);
+                        away = sanitizeTeamName(away);
+
                         const homeScore = parseInt(cols[2]) || 0;
                         const awayScore = parseInt(cols[3]) || 0;
                         const status = cols[4] ? cols[4].trim() : 'UPCOMING';
                         const kickoff = cols[5] ? cols[5].trim() : '--:--';
 
-                        // Parse the date structure for precise timestamp calculations
-                        // Format expected out of sheet layout: "11 Jun - 20:00"
                         let matchTimestamp = new Date();
                         const parts = kickoff.split(' - ');
                         if (parts.length === 2) {
@@ -292,7 +293,7 @@
                         }
 
                         const cardTemplate = `
-                            <div class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3 shadow-xs">
+                            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col justify-between items-center space-y-3 shadow-xs">
                                 <div class="flex items-center justify-between w-full text-xs text-slate-400">
                                     <span>Kickoff: ${kickoff}</span>
                                     ${statusBadge}
@@ -313,18 +314,16 @@
                             </div>
                         `;
 
-                        // Add to master full history log tab unconditionally
                         fullScheduleHTML += cardTemplate;
 
-                        // Check if match timestamp settles strictly inside the live rolling 48-hour window
                         if (matchTimestamp >= past24h && matchTimestamp <= future24h) {
                             rollingHTML += cardTemplate;
                         }
                     }
                 });
 
-                document.getElementById('fixtures-container').innerHTML = rollingHTML || `<p class="text-slate-400 text-sm italic py-8 col-span-2 text-center">No active fixtures found in the rolling 48-hour live slate window.</p>`;
-                document.getElementById('schedule-container').innerHTML = fullScheduleHTML || `<p class="text-slate-400 text-sm italic py-8 col-span-2 text-center">No matches in tournament schedule matrix.</p>`;
+                document.getElementById('fixtures-container').innerHTML = rollingHTML || `<p class="text-slate-400 text-sm italic py-8 col-span-2 text-center">No active fixtures found in the rolling 48-hour window.</p>`;
+                document.getElementById('schedule-container').innerHTML = fullScheduleHTML || `<p class="text-slate-400 text-sm italic py-8 col-span-2 text-center">No matches in tournament archive.</p>`;
                 
                 renderGlobalLeaderboards();
                 renderSplitsView();
@@ -357,7 +356,7 @@
                         return;
                     }
 
-                    const cell0 = cols[0].trim();
+                    let cell0 = cols[0].trim();
                     if (cell0.startsWith("Group")) {
                         inTable = true;
                         currentGroupCard = `
@@ -375,6 +374,7 @@
                                     <tbody class="divide-y divide-slate-700/40">
                         `;
                     } else if (inTable && cell0 !== "Home Team" && cell0 !== "Team") {
+                        cell0 = sanitizeTeamName(cell0);
                         const name = cell0;
                         const p = cols[1]?.trim() || '0';
                         const gd = cols[5]?.trim() || '0';
