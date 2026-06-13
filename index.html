@@ -8,6 +8,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
 
+    <!-- Navbar -->
     <nav class="bg-slate-800 p-4 border-b border-slate-700 shadow-lg">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-wider text-amber-400">🏆 SWEEPSTAKE LIVE</h1>
@@ -15,8 +16,10 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="max-w-6xl mx-auto p-6 space-y-6">
         
+        <!-- Prize Rules Dashboard Header -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm bg-slate-800/50 border border-slate-700/60 rounded-xl p-4">
             <div><p class="text-slate-400">🥇 Winner</p><p class="text-lg font-bold text-amber-400">£35</p></div>
             <div><p class="text-slate-400">🥈 Runner Up</p><p class="text-lg font-bold text-slate-300">£10</p></div>
@@ -24,6 +27,7 @@
             <div><p class="text-slate-400">🥅 Most Conceded</p><p class="text-lg font-bold text-red-400">£10</p></div>
         </div>
 
+        <!-- Interactive Navigation Toggle Tabs -->
         <div class="flex flex-wrap border-b border-slate-700 gap-1">
             <button id="tab-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors">
                 ⚽ Live Fixtures (48h)
@@ -39,7 +43,10 @@
             </button>
         </div>
 
+        <!-- VIEW 1: Live Matches Block Container (Reordered Layout) -->
         <div id="view-fixtures" class="space-y-6">
+            
+            <!-- 1. 48 Hours Scores -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
                 <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                     <h3 class="font-bold text-base tracking-wide flex items-center gap-2">
@@ -52,20 +59,54 @@
                 </div>
             </div>
 
-            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-                <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
-                    <h3 class="font-bold text-base text-slate-200 flex items-center gap-2">
-                        📰 BBC Sport Live Football News
-                    </h3>
-                    <span class="text-xs text-emerald-400 font-mono flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live Feed
-                    </span>
+            <!-- 2. Top 5 Attacking / Top 5 Conceded Leaderboards -->
+            <div id="leaderboard-section" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Top 5 Attacking Teams -->
+                <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
+                    <div class="p-4 bg-emerald-500/10 border-b border-slate-700">
+                        <h3 class="font-bold text-base text-emerald-400 flex items-center gap-2">🔥 Top 5 Attacking Teams</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-200">
+                            <thead class="text-xs uppercase bg-slate-700/20 text-slate-400 font-mono">
+                                <tr>
+                                    <th class="px-4 py-2 text-center w-12">Pos</th>
+                                    <th class="px-4 py-2">Team</th>
+                                    <th class="px-4 py-2">Owner</th>
+                                    <th class="px-4 py-2 text-center">Goals</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attacking-leaderboard-body" class="divide-y divide-slate-700/40">
+                                <tr><td colspan="4" class="px-4 py-4 text-center text-slate-400 animate-pulse">Calculating stats...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div id="bbc-news-container" class="p-4 space-y-3 max-h-[350px] overflow-y-auto bg-slate-900/40 divide-y divide-slate-800">
-                    <p class="text-slate-400 text-xs italic text-center py-6 animate-pulse">Fetching latest BBC world football wires...</p>
+
+                <!-- Top 5 Defending Teams -->
+                <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
+                    <div class="p-4 bg-red-500/10 border-b border-slate-700">
+                        <h3 class="font-bold text-base text-red-400 flex items-center gap-2">🥅 Top 5 Most Conceded</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-200">
+                            <thead class="text-xs uppercase bg-slate-700/20 text-slate-400 font-mono">
+                                <tr>
+                                    <th class="px-4 py-2 text-center w-12">Pos</th>
+                                    <th class="px-4 py-2">Team</th>
+                                    <th class="px-4 py-2">Owner</th>
+                                    <th class="px-4 py-2 text-center">Goals</th>
+                                </tr>
+                            </thead>
+                            <tbody id="defending-leaderboard-body" class="divide-y divide-slate-700/40">
+                                <tr><td colspan="4" class="px-4 py-4 text-center text-slate-400 animate-pulse">Calculating stats...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
+            <!-- 3. Embedded YouTube Video -->
             <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                 <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                     <h3 class="font-bold text-base text-slate-200 flex items-center gap-2">
@@ -85,12 +126,31 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 4. BBC Sport Feed -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="font-bold text-base text-slate-200 flex items-center gap-2">
+                        📰 BBC Sport Live Football News
+                    </h3>
+                    <span class="text-xs text-emerald-400 font-mono flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live Feed
+                    </span>
+                </div>
+                <div id="bbc-news-container" class="p-4 space-y-3 max-h-[350px] overflow-y-auto bg-slate-900/40 divide-y divide-slate-800">
+                    <p class="text-slate-400 text-xs italic text-center py-6 animate-pulse">Fetching latest BBC world football wires...</p>
+                </div>
+            </div>
+
         </div>
 
+        <!-- VIEW 2: Group Tables Matrix -->
         <div id="view-groups" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
+        <!-- VIEW 3: Sweepstake Splits Roster Matrix -->
         <div id="view-splits" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
+        <!-- VIEW 4: Full Schedule Archive Block Container -->
         <div id="view-schedule" class="hidden bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-0">
             <div class="p-4 bg-slate-700/50 border-b border-slate-700 flex justify-between items-center">
                 <h3 class="font-bold text-base tracking-wide">🏆 Complete Tournament Fixture History</h3>
@@ -100,51 +160,6 @@
             </div>
         </div>
 
-        <div id="leaderboard-section" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-            
-            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
-                <div class="p-4 bg-emerald-500/10 border-b border-slate-700">
-                    <h3 class="font-bold text-base text-emerald-400 flex items-center gap-2">🔥 Top 5 Attacking Teams</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-200">
-                        <thead class="text-xs uppercase bg-slate-700/20 text-slate-400 font-mono">
-                            <tr>
-                                <th class="px-4 py-2 text-center w-12">Pos</th>
-                                <th class="px-4 py-2">Team</th>
-                                <th class="px-4 py-2">Owner</th>
-                                <th class="px-4 py-2 text-center">Goals</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attacking-leaderboard-body" class="divide-y divide-slate-700/40">
-                            <tr><td colspan="4" class="px-4 py-4 text-center text-slate-400 animate-pulse">Calculating stats...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
-                <div class="p-4 bg-red-500/10 border-b border-slate-700">
-                    <h3 class="font-bold text-base text-red-400 flex items-center gap-2">🥅 Top 5 Most Conceded</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-200">
-                        <thead class="text-xs uppercase bg-slate-700/20 text-slate-400 font-mono">
-                            <tr>
-                                <th class="px-4 py-2 text-center w-12">Pos</th>
-                                <th class="px-4 py-2">Team</th>
-                                <th class="px-4 py-2">Owner</th>
-                                <th class="px-4 py-2 text-center">Goals</th>
-                            </tr>
-                        </thead>
-                        <tbody id="defending-leaderboard-body" class="divide-y divide-slate-700/40">
-                            <tr><td colspan="4" class="px-4 py-4 text-center text-slate-400 animate-pulse">Calculating stats...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
     </main>
 
     <script>
@@ -178,7 +193,6 @@
         const MATCHES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=0&output=csv";
         const GROUPS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIfV0ObeCcNxQ-isq57ynUnhrX15A82ZjWh0e3whIqH6Epfp5guXbYswi1G_ctA2WE-FmAYIHwyy3G/pub?gid=1430000650&output=csv";
 
-        // 📡 API INTERCEPTOR: Fetches and converts the BBC Sport XML feed into a clean JSON layout block
         async function fetchBBCNewsFeed() {
             const container = document.getElementById('bbc-news-container');
             const targetRSS = "https://feeds.bbci.co.uk/sport/football/rss.xml";
@@ -190,7 +204,7 @@
                 
                 if (data.status === 'ok' && data.items.length > 0) {
                     let newsHTML = '';
-                    data.items.slice(0, 6).forEach(item => { // Display top 6 fresh articles
+                    data.items.slice(0, 6).forEach(item => {
                         newsHTML += `
                             <div class="pt-3 first:pt-0 pb-1 group">
                                 <a href="${item.link}" target="_blank" class="block space-y-1">
@@ -287,18 +301,16 @@
 
             if (view === 'fixtures') {
                 fixtView.classList.remove('hidden');
-                leadSection.classList.remove('hidden');
+                leadSection.classList.remove('hidden'); // Keeps leaderboards tracking on home screen layout
                 btnFixt.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             } else if (view === 'groups') {
                 groupView.classList.remove('hidden');
-                leadSection.classList.remove('hidden');
                 btnGroup.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             } else if (view === 'splits') {
                 splitsView.classList.remove('hidden');
                 btnSplits.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             } else if (view === 'schedule') {
                 scheduleView.classList.remove('hidden');
-                leadSection.classList.remove('hidden');
                 btnSchedule.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             }
         }
@@ -542,7 +554,7 @@
         async function init() {
             await loadMatchesData();
             await loadGroupsData();
-            await fetchBBCNewsFeed(); // Fire the feed compiler asynchronously
+            await fetchBBCNewsFeed();
         }
 
         init();
