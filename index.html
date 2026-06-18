@@ -43,7 +43,7 @@
             </button>
         </div>
 
-        <!-- VIEW 1: Live Matches Block Container (Reordered Layout) -->
+        <!-- VIEW 1: Live Matches Block Container -->
         <div id="view-fixtures" class="space-y-6">
             
             <!-- 1. 48 Hours Scores -->
@@ -59,9 +59,8 @@
                 </div>
             </div>
 
-            <!-- 2. Top 5 Attacking / Top 5 Conceded Leaderboards -->
+            <!-- 2. Leaderboards Section -->
             <div id="leaderboard-section" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Top 5 Attacking Teams -->
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                     <div class="p-4 bg-emerald-500/10 border-b border-slate-700">
                         <h3 class="font-bold text-base text-emerald-400 flex items-center gap-2">🔥 Top 5 Attacking Teams</h3>
@@ -83,7 +82,6 @@
                     </div>
                 </div>
 
-                <!-- Top 5 Defending Teams -->
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-md">
                     <div class="p-4 bg-red-500/10 border-b border-slate-700">
                         <h3 class="font-bold text-base text-red-400 flex items-center gap-2">🥅 Top 5 Most Conceded</h3>
@@ -284,7 +282,6 @@
             const groupView = document.getElementById('view-groups');
             const splitsView = document.getElementById('view-splits');
             const scheduleView = document.getElementById('view-schedule');
-            const leadSection = document.getElementById('leaderboard-section');
 
             const btnFixt = document.getElementById('tab-fixtures');
             const btnGroup = document.getElementById('tab-groups');
@@ -295,13 +292,11 @@
             groupView.classList.add('hidden');
             splitsView.classList.add('hidden');
             scheduleView.classList.add('hidden');
-            leadSection.classList.add('hidden');
 
             btnFixt.className = btnGroup.className = btnSplits.className = btnSchedule.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors";
 
             if (view === 'fixtures') {
                 fixtView.classList.remove('hidden');
-                leadSection.classList.remove('hidden'); // Keeps leaderboards tracking on home screen layout
                 btnFixt.className = "px-4 py-2 md:px-6 font-bold text-sm border-b-2 border-amber-400 text-amber-400 transition-colors";
             } else if (view === 'groups') {
                 groupView.classList.remove('hidden');
@@ -412,6 +407,7 @@
             }
         }
 
+        // 📊 Updated Groups Parser: Loops team cards and assigns the correct owner block inline
         async function loadGroupsData() {
             try {
                 const response = await fetch(GROUPS_CSV_URL);
@@ -442,16 +438,16 @@
                         currentGroupCard = `
                             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
                                 <h4 class="text-amber-400 font-bold mb-2 tracking-wide border-b border-slate-700 pb-1">${cell0}</h4>
-                                <table class="w-full text-xs text-left text-slate-300">
+                                <table class="w-full text-xs text-left text-slate-300 border-separate border-spacing-y-1.5">
                                     <thead>
-                                        <tr class="text-slate-500 font-mono">
-                                            <th class="py-1">Team</th>
-                                            <th class="py-1 text-center">P</th>
-                                            <th class="py-1 text-center">GD</th>
-                                            <th class="py-1 text-center font-bold text-slate-400">PTS</th>
+                                        <tr class="text-slate-500 font-mono text-[10px]">
+                                            <th class="pb-1">Team / Owner</th>
+                                            <th class="pb-1 text-center">P</th>
+                                            <th class="pb-1 text-center">GD</th>
+                                            <th class="pb-1 text-center font-bold text-slate-400">PTS</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-slate-700/40">
+                                    <tbody>
                         `;
                     } else if (inTable && cell0 !== "Home Team" && cell0 !== "Team") {
                         cell0 = sanitizeTeamName(cell0);
@@ -460,12 +456,19 @@
                         const gd = cols[5]?.trim() || '0';
                         const pts = cols[6]?.trim() || '0';
 
+                        // Appends a custom dual-row entry per team for clean, responsive display layout
                         currentGroupCard += `
+                            <tr class="align-middle">
+                                <td class="py-1 font-semibold text-slate-100 truncate max-w-[140px]">
+                                    <div class="flex items-center">${getFlagImg(name)} ${name}</div>
+                                    <div class="mt-1 transform scale-90 origin-left">${getOwnerBadge(getOwner(name))}</div>
+                                </td>
+                                <td class="py-1 text-center font-mono align-top pt-1 text-slate-300">${p}</td>
+                                <td class="py-1 text-center font-mono align-top pt-1 text-slate-400">${gd}</td>
+                                <td class="py-1 text-center font-mono align-top pt-1 font-bold text-emerald-400">${pts}</td>
+                            </tr>
                             <tr>
-                                <td class="py-2 font-medium flex items-center truncate max-w-[130px]">${getFlagImg(name)} ${name}</td>
-                                <td class="py-2 text-center font-mono">${p}</td>
-                                <td class="py-2 text-center font-mono text-slate-400">${gd}</td>
-                                <td class="py-2 text-center font-mono font-bold text-emerald-400">${pts}</td>
+                                <td colspan="4" class="h-[1px] bg-slate-700/30"></td>
                             </tr>
                         `;
                     }
